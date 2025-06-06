@@ -139,11 +139,11 @@ RUN apt update && apt install -y \
     python3-tk
 USER $NAME
 
-# Install plotjuggler - Nelson Durrant, Feb 2025
-# Useful for plotting and visualizing data from ROS 2 bags and real-time tests
-USER root
-RUN apt update && apt install -y ros-humble-plotjuggler-ros
-USER $NAME
+# # Install plotjuggler - Nelson Durrant, Feb 2025
+# # Useful for plotting and visualizing data from ROS 2 bags and real-time tests
+# USER root
+# RUN apt update && apt install -y ros-humble-plotjuggler-ros
+# USER $NAME
 
 # Install mobility packages - Nelson Durrant, Feb 2025
 # Used for controlling the robot's movement through a joystick or keyboard
