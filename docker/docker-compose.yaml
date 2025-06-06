@@ -5,6 +5,8 @@ services:
     container_name: agrobot-ct
     build: .
     user: agrobot-docker
+    group_add:
+      - 993
     network_mode: host
     privileged: true
     devices:
