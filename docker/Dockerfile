@@ -177,3 +177,7 @@ USER $NAME
 # Install the serial and pyserial libraries - Nelson Durrant, May 2025
 # Used by the roboclaw library for serial communication
 RUN pip3 install serial pyserial
+
+# Install for software PWM on any GPIO pin for controlling servos - Alyssa Fielding, Jun 2025
+RUN pip3 install gpiozero
+
