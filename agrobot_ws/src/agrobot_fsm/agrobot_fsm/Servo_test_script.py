@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
-from gpiozero import Servo      # look into most recent 
-from agrobot_interfaces.srv import Servo
+from gpiozero import Servo
+from agrobot_interfaces.srv import Servo as ServoSrv
 
 class ServoController(Node):
     def __init__(self):
@@ -17,7 +17,7 @@ class ServoController(Node):
             # Servo(25),  # GPIO25
         ]
 
-        self.srv = self.create_service(Servo, 'set_servos', self.set_servos_callback)
+        self.srv = self.create_service(ServoSrv, 'set_servos', self.set_servos_callback)
 
     def set_servos_callback(self, request, response):
         # Example: move all servos to max (True) or min (False)
