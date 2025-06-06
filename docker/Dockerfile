@@ -178,6 +178,14 @@ USER $NAME
 # Used by the roboclaw library for serial communication
 RUN pip3 install serial pyserial
 
+# Install GPIO libraries for hardware control - Alyssa Fielding, Jun 2025
+USER root
+RUN apt update && apt install -y \
+    python3-rpi.gpio \
+    python3-lgpio \
+    python3-pigpio
+USER $NAME
+
 # Install for software PWM on any GPIO pin for controlling servos - Alyssa Fielding, Jun 2025
 RUN pip3 install gpiozero
 
