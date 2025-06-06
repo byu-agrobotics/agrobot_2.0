@@ -188,6 +188,10 @@ USER $NAME
 
 # Install for software PWM on any GPIO pin for controlling servos - Alyssa Fielding, Jun 2025
 RUN pip3 install gpiozero   
-RUN groupadd -g 993 gpio && usermod -aG gpio agrobot-docker
 
-
+USER root
+RUN rm -f /etc/group.lock /etc/gshadow.lock && \
+    groupadd -g 993 gpio && \
+    usermod -aG gpio agrobot-docker
+USER agrobot-docker
+    
