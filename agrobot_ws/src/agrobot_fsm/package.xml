@@ -7,7 +7,17 @@
   <maintainer email="snelsondurrant@gmail.com">Nelson Durrant</maintainer>
   <license>Apache-2.0</license>
 
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+
+  
+  <build_depend>rosidl_default_runtime</build_depend>
+  <build_depend>agrobot_interfaces</build_depend>
+
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  <exec_depend>agrobot_interfaces</exec_depend>
+
   <export>
     <build_type>ament_python</build_type>
+
   </export>
 </package>
