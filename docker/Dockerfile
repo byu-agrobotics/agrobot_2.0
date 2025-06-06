@@ -187,5 +187,7 @@ RUN apt update && apt install -y \
 USER $NAME
 
 # Install for software PWM on any GPIO pin for controlling servos - Alyssa Fielding, Jun 2025
-RUN pip3 install gpiozero
+RUN pip3 install gpiozero   
+RUN groupadd -g 993 gpio && usermod -aG gpio agrobot-docker
+
 
