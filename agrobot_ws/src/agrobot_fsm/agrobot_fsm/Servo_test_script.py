@@ -1,5 +1,8 @@
 import rclpy
 from rclpy.node import Node
+import os
+os.environ["GPIOZERO_PIN_FACTORY"] = "lgpio
+from gpiozero import Servo
 from gpiozero import Servo
 from agrobot_interfaces.srv import Servo as ServoSrv
 
