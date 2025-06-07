@@ -17,7 +17,7 @@ services:
       - /dev/gpiochip4
       - /dev/gpiomem0
     environment:
-      - GPIOZERO_PIN_FACTORY=rpi_lgpio 
+      # - GPIOZERO_PIN_FACTORY=rpi_lgpio 
       - DISPLAY=$DISPLAY # Required for GUI applications
       - QT_X11_NO_MITSHM=1 # Required for GUI applications
     volumes:

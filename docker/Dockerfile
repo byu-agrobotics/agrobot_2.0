@@ -200,17 +200,17 @@ USER $NAME
 # RUN apt update &&  apt install -y python3-pip python3-lgpio python3-pigpio python3-rpi.gpio
 # RUN pip3 install gpiozero --break-system-packages
 
-# Switch to root to install system packages
-USER root
+# # Switch to root to install system packages
+# USER root
 
-RUN apt update && apt install -y \
-    python3-pip \
-    python3-lgpio \
-    python3-pigpio \
-    python3-rpi.gpio
+# RUN apt update && apt install -y \
+#     python3-pip \
+#     python3-lgpio \
+#     python3-pigpio \
+#     python3-rpi.gpio
 
-# Install Python packages
-RUN pip install gpiozero rpi.lgpio --break-system-packages
+# # Install Python packages
+# RUN pip install gpiozero rpi.lgpio --break-system-packages
 
-# Switch back to agrobot-docker user
-USER agrobot-docker
+# # Switch back to agrobot-docker user
+# USER agrobot-docker

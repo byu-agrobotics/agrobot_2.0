@@ -23,13 +23,15 @@
 #include "tof_pub.h"
 #include "DFRobot_TMF8x01.h"
 #include <SoftwareSerial.h>
+#include <Servo.h>
 // #include <frost_interfaces/msg/u_command.h>
 
-#define ENABLE_ACTUATORS
-#define ENABLE_TOF_SENSORS
+// #define ENABLE_ACTUATORS
+// #define ENABLE_TOF_SENSORS
 #define ENABLE_LEDS
-#define ENABLE_BATTERY
-#define ENABLE_BT_DEBUG
+// #define ENABLE_BATTERY
+// #define ENABLE_BT_DEBUG
+#define ENABLE_SERVOS
 
 #define EN1       2                      // EN pin for left TMF8801
 #define EN2       3                      // EN pin for right TMF8801
@@ -60,6 +62,8 @@
 #define VOLT_PIN 18
 #define CURRENT_PIN 17
 #define LED_PIN 13 // Built-in Teensy LED
+
+Servo Servo1;
 
 // sensor baud rates
 #define BT_DEBUG_RATE 9600
@@ -204,6 +208,11 @@ void setup() {
   BTSerial.println("[INFO] Battery Sensor enabled");
 #endif // ENABLE_BT_DEBUG
 #endif // ENABLE_BATTERY
+
+#ifdef ENABLE_SERVOS
+Servo1.attach(6)
+
+#endif // ENABLE_SERVOS
 
 #ifdef ENABLE_TOF_SENSORS // TODO: Add ifdefs for BTSerial below
   
@@ -390,6 +399,11 @@ void loop() {
     digitalWrite(LED_PIN, HIGH);
   }
 
+  Servo1.write(90);  // move to 90 degrees
+  delay(2000);
+  Servo1.write(0);   // move to 0 degrees
+  delay(2000);
+  
   // fail safe for agent disconnect
   if (millis() - last_received > 5000) {
 
