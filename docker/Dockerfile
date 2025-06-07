@@ -187,11 +187,27 @@ RUN apt update && apt install -y \
 USER $NAME
 
 # Install for software PWM on any GPIO pin for controlling servos - Alyssa Fielding, Jun 2025
-RUN pip3 install gpiozero   
+# RUN pip3 install gpiozero   
 
-USER root
-RUN rm -f /etc/group.lock /etc/gshadow.lock && \
-    groupadd -g 993 gpio && \
-    usermod -aG gpio agrobot-docker
-USER agrobot-docker
+# USER root
+# RUN rm -f /etc/group.lock /etc/gshadow.lock && \
+#     groupadd -g 993 gpio && \
+#     usermod -aG gpio agrobot-docker
+# USER agrobot-docker
+
+# FROM ubuntu:23.04
+
+# RUN apt update &&  apt install -y python3-pip python3-lgpio python3-pigpio python3-rpi.gpio
+# RUN pip3 install gpiozero --break-system-packages
+
+# Install system packages (lgpio, etc.)
+RUN apt update && apt install -y \
+    python3-pip \
+    python3-lgpio \
+    python3-pigpio \
+    python3-rpi.gpio
+
+# Install pip packages
+# --break-system-packages is needed because Ubuntu-based Docker images aren't pip-friendly by default
+RUN pip install gpiozero rpi.lgpio --break-system-packages
     
