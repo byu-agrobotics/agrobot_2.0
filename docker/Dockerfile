@@ -200,14 +200,17 @@ USER $NAME
 # RUN apt update &&  apt install -y python3-pip python3-lgpio python3-pigpio python3-rpi.gpio
 # RUN pip3 install gpiozero --break-system-packages
 
-# Install system packages (lgpio, etc.)
+# Switch to root to install system packages
+USER root
+
 RUN apt update && apt install -y \
     python3-pip \
     python3-lgpio \
     python3-pigpio \
     python3-rpi.gpio
 
-# Install pip packages
-# --break-system-packages is needed because Ubuntu-based Docker images aren't pip-friendly by default
+# Install Python packages
 RUN pip install gpiozero rpi.lgpio --break-system-packages
-    
+
+# Switch back to agrobot-docker user
+USER agrobot-docker
