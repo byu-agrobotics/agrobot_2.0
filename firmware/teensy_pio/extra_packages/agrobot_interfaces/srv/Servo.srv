@@ -1,0 +1,4 @@
+bool data          # request field: input boolean value
+---
+bool success       # response field: whether the service call succeeded
+string message     # response field: any descriptive message

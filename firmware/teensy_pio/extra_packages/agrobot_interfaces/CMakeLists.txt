@@ -8,7 +8,6 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(action_msgs REQUIRED)
-
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -27,9 +26,11 @@ endif()
 
 find_package(rosidl_default_generators REQUIRED)
 
+
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/GenericTask.action"
   "srv/IdentifyEgg.srv"
+  "srv/Servo.srv"
 )
 
 ament_package()
