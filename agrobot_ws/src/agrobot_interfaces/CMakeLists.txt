@@ -31,6 +31,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/GenericTask.action"
   "srv/IdentifyEgg.srv"
   "srv/Servo.srv"
+  "msg/BatterySatus.msg"
+  "msg/DriveCommand.msg"
+  "msg/LEDCommand.msg"
+  "ToFData.msg"
 )
 
 ament_package()

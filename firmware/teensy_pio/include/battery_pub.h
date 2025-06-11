@@ -31,7 +31,7 @@ public:
   using Publisher::destroy;
 
 private:
-  agagrobot_interfaces__msg__BatteryStatus msg;
+  agrobot_interfaces__msg__BatteryStatus msg;
 };
 
 #endif // BATTERY_PUB 
