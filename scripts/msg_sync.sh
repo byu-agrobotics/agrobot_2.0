@@ -7,10 +7,10 @@
 BASE_DIR=~/agrobot_2.0
 
 # Sync message interfaces from ROS2 workspace to micro-ROS firmware
-rsync -avc --delete "$BASE_DIR/agrobot_ws/src/agrobot_interfaces" "$BASE_DIR/firmware/teensy_pio/extra_packages"
+rsync -avc --delete "$/agrobot_ws/src/agrobot_interfaces" "$BASE_DIR/firmware/teensy_pio/extra_packages"
 
 # Navigate to firmware directory
-cd "$BASE_DIR/firmware/teensy_pio"
+cd "$/firmware/teensy_pio"
 
 pio run --target clean_microros
 pio pkg install
