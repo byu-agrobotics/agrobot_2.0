@@ -30,7 +30,7 @@
 // #define ENABLE_TOF_SENSORS
 #define ENABLE_LEDS
 // #define ENABLE_BATTERY
-// #define ENABLE_BT_DEBUG
+#define ENABLE_BT_DEBUG
 #define ENABLE_SERVOS
 
 #define EN1       2                      // EN pin for left TMF8801
@@ -188,6 +188,8 @@ void destroy_entities() {
  * Sets up the micro-ROS serial transports. This function sets up the
  * micro-ROS serial transports for communication with the Raspberry Pi.
  */
+
+
 void setup() {
 
   Serial.begin(BAUD_RATE);
@@ -210,7 +212,7 @@ void setup() {
 #endif // ENABLE_BATTERY
 
 #ifdef ENABLE_SERVOS
-Servo1.attach(6)
+Servo1.attach(6);
 
 #endif // ENABLE_SERVOS
 
@@ -347,6 +349,8 @@ Servo1.attach(6)
   state = WAITING_AGENT;
 }
 
+
+
 /**
  * Reads the battery sensor data. This function reads the battery sensor
  * data (voltage and current) and publishes it to the micro-ROS agent.
@@ -361,6 +365,8 @@ void read_battery() {
   // publish the battery data
   battery_pub.publish(voltage, current);
 }
+
+
 
 void read_tof_sensor() {
 
@@ -384,6 +390,8 @@ void read_tof_sensor() {
   // publish the TOF sensor data [ADD back_distance WHEN able to power all 4 sensors]
   tof_pub.publish(left_distance, right_distance, front_distance, back_distance);
 }
+
+
 
 /**
  * This function is the main loop for the micro-ROS node. It manages the
