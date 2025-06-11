@@ -19,9 +19,9 @@
  * approach, see: https://github.com/BYU-FRoSt-Lab/cougars-teensy.git
  */
 
-// #include "battery_pub.h"
-// #include "tof_pub.h"
-// #include "DFRobot_TMF8x01.h"
+#include "battery_pub.h"
+#include "tof_pub.h"
+#include "DFRobot_TMF8x01.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
 // #include <frost_interfaces/msg/u_command.h>
@@ -83,8 +83,8 @@ rclc_support_t support;
 rcl_allocator_t allocator;
 rcl_node_t node;
 
-// // publisher objects
-// BatteryPub battery_pub;
+// publisher objects
+BatteryPub battery_pub;
 
 // TOF publisher object
 TofPub tof_pub;
@@ -149,9 +149,9 @@ bool create_entities() {
   }
 #endif // ENABLE_BT_DEBUG
 
-  // // create publishers
-  // battery_pub.setup(node);
-  // tof_pub.setup(node);
+  // create publishers
+  battery_pub.setup(node);
+  tof_pub.setup(node);
 
 #ifdef ENABLE_BT_DEBUG
   BTSerial.println("[INFO] Micro-ROS entities created successfully");
@@ -168,9 +168,9 @@ void destroy_entities() {
   rmw_context_t *rmw_context = rcl_context_get_rmw_context(&support.context);
   (void)rmw_uros_set_context_entity_destroy_session_timeout(rmw_context, 0);
 
-  // // destroy publishers
-  // battery_pub.destroy(node);
-  // tof_pub.destroy(node);
+  // destroy publishers
+  battery_pub.destroy(node);
+  tof_pub.destroy(node);
 
   if (rcl_node_fini(&node) != RCL_RET_OK) {
 #ifdef ENABLE_BT_DEBUG
@@ -358,8 +358,8 @@ void read_battery() {
   float voltage = (analogRead(VOLT_PIN) * 0.03437) + 0.68;
   float current = (analogRead(CURRENT_PIN) * 0.122) - 11.95;
 
-  // // publish the battery data
-  // battery_pub.publish(voltage, current);
+  // publish the battery data
+  battery_pub.publish(voltage, current);
 }
 
 void read_tof_sensor() {
