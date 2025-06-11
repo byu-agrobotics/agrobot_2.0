@@ -13,11 +13,8 @@
 cd ~/firmware/teensy_pio
 pio run
 
-# Try to reboot Teensy to bootloader
-teensy-cli reboot
-
-# Wait a second for bootloader to start
-sleep 1
+echo "Please press the RESET button on the Teensy NOW to enter bootloader mode..."
+read -p "Press Enter after pressing reset..."
 
 cd ~/firmware/teensy_pio/.pio/build/teensy41
 tycmd upload firmware.hex
