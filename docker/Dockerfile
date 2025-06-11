@@ -139,8 +139,9 @@ RUN apt update && apt install -y \
     python3-tk
 USER $NAME
 
-# # Install plotjuggler - Nelson Durrant, Feb 2025
-# # Useful for plotting and visualizing data from ROS 2 bags and real-time tests
+# NOTE: For some reason, this is broken as of Jun 2025
+# Install plotjuggler - Nelson Durrant, Feb 2025
+# Useful for plotting and visualizing data from ROS 2 bags and real-time tests
 # USER root
 # RUN apt update && apt install -y ros-humble-plotjuggler-ros
 # USER $NAME
@@ -177,40 +178,3 @@ USER $NAME
 # Install the serial and pyserial libraries - Nelson Durrant, May 2025
 # Used by the roboclaw library for serial communication
 RUN pip3 install serial pyserial
-
-# Install GPIO libraries for hardware control - Alyssa Fielding, Jun 2025
-USER root
-RUN apt update && apt install -y \
-    python3-rpi.gpio \
-    python3-lgpio \
-    python3-pigpio
-USER $NAME
-
-# Install for software PWM on any GPIO pin for controlling servos - Alyssa Fielding, Jun 2025
-# RUN pip3 install gpiozero   
-
-# USER root
-# RUN rm -f /etc/group.lock /etc/gshadow.lock && \
-#     groupadd -g 993 gpio && \
-#     usermod -aG gpio agrobot-docker
-# USER agrobot-docker
-
-# FROM ubuntu:23.04
-
-# RUN apt update &&  apt install -y python3-pip python3-lgpio python3-pigpio python3-rpi.gpio
-# RUN pip3 install gpiozero --break-system-packages
-
-# # Switch to root to install system packages
-# USER root
-
-# RUN apt update && apt install -y \
-#     python3-pip \
-#     python3-lgpio \
-#     python3-pigpio \
-#     python3-rpi.gpio
-
-# # Install Python packages
-# RUN pip install gpiozero rpi.lgpio --break-system-packages
-
-# # Switch back to agrobot-docker user
-# USER agrobot-docker
