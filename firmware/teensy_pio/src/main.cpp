@@ -1,7 +1,13 @@
-#define BTSerial Serial6  // Pins 34 (RX), 35 (TX) on Teensy 4.1
+#include <SoftwareSerial.h>
+
+// Use regular digital pins for SoftwareSerial (e.g., 10 and 11)
+#define BT_RX_PIN 10  // Teensy RX from HC-05 TX
+#define BT_TX_PIN 11  // Teensy TX to HC-05 RX
+
+SoftwareSerial BTSerial(BT_RX_PIN, BT_TX_PIN); // RX, TX
 
 void setup() {
-  BTSerial.begin(9600);  // Default baud rate for HC-05 modules
+  BTSerial.begin(9600);  // HC-05 default baud rate
   BTSerial.println("Hello from Teensy via Bluetooth!");
 }
 
@@ -9,13 +15,6 @@ void loop() {
   BTSerial.println("Ping from Teensy!");
   delay(1000);
 }
-
-
-
-
-
-
-
 
 
 
