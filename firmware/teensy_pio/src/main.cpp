@@ -1,29 +1,14 @@
-
-#include <SoftwareSerial.h>
-
-// Define your Bluetooth RX/TX pins
-#define BT_RX 34  // Teensy pin receiving data from HC-05 TX
-#define BT_TX 35  // Teensy pin sending data to HC-05 RX
-
-// Create SoftwareSerial object
-SoftwareSerial BTSerial(BT_RX, BT_TX);
+#define BTSerial Serial6  // Pins 34 (RX), 35 (TX) on Teensy 4.1
 
 void setup() {
-  // Start Bluetooth serial
-  BTSerial.begin(9600);  // Match your HC-05 baud rate (often 9600 default)
-
+  BTSerial.begin(9600);  // Default baud rate for HC-05 modules
   BTSerial.println("Hello from Teensy via Bluetooth!");
 }
 
 void loop() {
-  // Send a message every second
   BTSerial.println("Ping from Teensy!");
   delay(1000);
-
 }
-
-
-
 
 
 
