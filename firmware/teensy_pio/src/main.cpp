@@ -450,7 +450,7 @@ void loop() {
 
   Servo1.write(90);  // move to 90 degrees
   delay(2000);
-  BTSerial.println("Moved servo1")
+  BTSerial.println("Moved servo1");
   Servo1.write(0);   // move to 0 degrees
   delay(2000);
   
