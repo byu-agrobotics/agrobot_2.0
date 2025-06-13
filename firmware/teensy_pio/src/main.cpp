@@ -448,11 +448,18 @@ void loop() {
   }
 
 
-  Servo1.write(90);  // move to 90 degrees
-  delay(2000);
-  BTSerial.println("Moved servo1");
-  Servo1.write(0);   // move to 0 degrees
-  delay(2000);
+    // Move servo every 2 seconds, non-blockingly
+  if (millis() - last_servo_move > 2000) {
+    if (servo_at_90) {
+      Servo1.write(0);
+      BTSerial.println("Moved servo1 to 0");
+    } else {
+      Servo1.write(90);
+      BTSerial.println("Moved servo1 to 90");
+    }
+    servo_at_90 = !servo_at_90;
+    last_servo_move = millis();
+  }
   
   // fail safe for agent disconnect
   if (millis() - last_received > 5000) {
