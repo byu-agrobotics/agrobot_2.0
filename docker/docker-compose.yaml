@@ -9,6 +9,7 @@ services:
     privileged: true
     devices:
       - "/dev/ttyACM0:/dev/ttyACM0"
+      - "/dev/bus/usb:/dev/bus/usb"
     environment:
       - DISPLAY=$DISPLAY # Required for GUI applications
       - QT_X11_NO_MITSHM=1 # Required for GUI applications
