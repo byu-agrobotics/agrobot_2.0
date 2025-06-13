@@ -104,6 +104,9 @@
 
 Servo Servo1;
 
+unsigned long last_servo_move = 0;
+bool servo_at_90 = true;
+
 // sensor baud rates
 #define BT_DEBUG_RATE 9600
 
