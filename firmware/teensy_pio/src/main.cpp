@@ -12,7 +12,6 @@ void setup() {
   // Start Bluetooth serial
   BTSerial.begin(9600);  // Match your HC-05 baud rate (often 9600 default)
 
-  Serial.println("Bluetooth Serial Test Starting...");
   BTSerial.println("Hello from Teensy via Bluetooth!");
 }
 
