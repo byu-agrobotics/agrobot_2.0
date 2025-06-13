@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
-#define BT_RX_PIN 10
-#define BT_TX_PIN 11
+#define BT_MC_RX 34
+#define BT_MC_TX 35
 
-SoftwareSerial BTSerial(BT_RX_PIN, BT_TX_PIN);
+SoftwareSerial BTSerial(BT_MC_RX, BT_MC_TX);
 
 void setup(){
   BTSerial.begin(9600);
