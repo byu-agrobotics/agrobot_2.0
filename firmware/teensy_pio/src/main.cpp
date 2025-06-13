@@ -14,7 +14,6 @@ void setup() {
 
   // Optional: onboard USB serial for debugging
   Serial.begin(115200);
-  while (!Serial) {}  // Wait for serial monitor (optional)
 
   Serial.println("Bluetooth Serial Test Starting...");
   BTSerial.println("Hello from Teensy via Bluetooth!");
@@ -25,12 +24,6 @@ void loop() {
   BTSerial.println("Ping from Teensy!");
   delay(1000);
 
-  // Optional: echo anything from Bluetooth to USB Serial
-  if (BTSerial.available()) {
-    char c = BTSerial.read();
-    Serial.print("From BT: ");
-    Serial.println(c);
-  }
 }
 
 
