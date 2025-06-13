@@ -14,8 +14,12 @@ void setup(){
 void loop(){
   BTSerial.println("ping from Teensy!");
   delay(1000);
+  if (BTSerial.available()) {
+    char c = BTSerial.read();
+    BTSerial.print("You sent: ");
+    BTSerial.println(c);
+  }
 }
-
 
 
 
