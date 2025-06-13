@@ -447,10 +447,12 @@ void loop() {
     digitalWrite(LED_PIN, HIGH);
   }
 
-//   Servo1.write(90);  // move to 90 degrees
-//   delay(2000);
-//   Servo1.write(0);   // move to 0 degrees
-//   delay(2000);
+
+  Servo1.write(90);  // move to 90 degrees
+  delay(2000);
+  BTSerial.println("Moved servo1")
+  Servo1.write(0);   // move to 0 degrees
+  delay(2000);
   
   // fail safe for agent disconnect
   if (millis() - last_received > 5000) {
