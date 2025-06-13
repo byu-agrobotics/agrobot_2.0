@@ -447,25 +447,22 @@ void loop() {
     digitalWrite(LED_PIN, HIGH);
   }
 
-#ifdef ENABLE_BT_DEBUG
-    BTSerial.println("blinking");
-#endif // ENABLE_BT_DEBUG
 //   Servo1.write(90);  // move to 90 degrees
 //   delay(2000);
 //   Servo1.write(0);   // move to 0 degrees
 //   delay(2000);
   
-//   // fail safe for agent disconnect
-//   if (millis() - last_received > 5000) {
+  // fail safe for agent disconnect
+  if (millis() - last_received > 5000) {
 
-// #ifdef ENABLE_ACTUATORS
-//     // TODO: Add actuator stop code here
-// #endif // ENABLE_ACTUATORS
+#ifdef ENABLE_ACTUATORS
+    // TODO: Add actuator stop code here
+#endif // ENABLE_ACTUATORS
 
-// #ifdef ENABLE_BT_DEBUG
-//     BTSerial.println("[INFO] No command received in timeout, stopping actuators");
-// #endif // ENABLE_BT_DEBUG
-//   }
+#ifdef ENABLE_BT_DEBUG
+    BTSerial.println("[INFO] No command received in timeout, stopping actuators");
+#endif // ENABLE_BT_DEBUG
+  }
 
 //   // state machine to manage connecting and disconnecting the micro-ROS agent
 //   switch (state) {
