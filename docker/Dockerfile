@@ -178,3 +178,6 @@ USER $NAME
 # Install the serial and pyserial libraries - Nelson Durrant, May 2025
 # Used by the roboclaw library for serial communication
 RUN pip3 install serial pyserial
+
+# Needed to run tycmd 
+RUN apt update && apt install -y libusb-1.0-0
