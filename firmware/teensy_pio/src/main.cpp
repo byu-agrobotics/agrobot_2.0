@@ -459,53 +459,54 @@ void loop() {
     // TODO: Add actuator stop code here
 #endif // ENABLE_ACTUATORS
 
-#ifdef ENABLE_BT_DEBUG
-    BTSerial.println("[INFO] No command received in timeout, stopping actuators");
-#endif // ENABLE_BT_DEBUG
+// #ifdef ENABLE_BT_DEBUG   // this is useless, we aren't receiving information through bluetooth
+//     BTSerial.println("[INFO] No command received in timeout, stopping actuators");
+// #endif // ENABLE_BT_DEBUG
+
   }
 
-//   // state machine to manage connecting and disconnecting the micro-ROS agent
-//   switch (state) {
-//   case WAITING_AGENT:
-//     EXECUTE_EVERY_N_MS(500, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_AVAILABLE : WAITING_AGENT;);
-//     break;
+  // state machine to manage connecting and disconnecting the micro-ROS agent
+  switch (state) {
+  case WAITING_AGENT:
+    EXECUTE_EVERY_N_MS(500, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_AVAILABLE : WAITING_AGENT;);
+    break;
 
-//   case AGENT_AVAILABLE:
-//     state = (true == create_entities()) ? AGENT_CONNECTED : WAITING_AGENT;
-//     if (state == WAITING_AGENT) {
-//       destroy_entities();
-//     };
-//     break;
+  case AGENT_AVAILABLE:
+    state = (true == create_entities()) ? AGENT_CONNECTED : WAITING_AGENT;
+    if (state == WAITING_AGENT) {
+      destroy_entities();
+    };
+    break;
 
-// //loop that runs when microros agent is connected
-//   case AGENT_CONNECTED:
-//     EXECUTE_EVERY_N_MS(200, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_CONNECTED : AGENT_DISCONNECTED;);
-//     if (state == AGENT_CONNECTED) {
+//loop that runs when microros agent is connected
+  case AGENT_CONNECTED:
+    EXECUTE_EVERY_N_MS(200, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_CONNECTED : AGENT_DISCONNECTED;);
+    if (state == AGENT_CONNECTED) {
       
-//       //////////////////////////////////////////////////////////
-//       // EXECUTES WHEN THE AGENT IS CONNECTED
-//       //////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////
+      // EXECUTES WHEN THE AGENT IS CONNECTED
+      //////////////////////////////////////////////////////////
 
-// #ifdef ENABLE_BATTERY
-//       EXECUTE_EVERY_N_MS(BATTERY_MS, read_battery());
-// #endif // ENABLE_BATTERY
+#ifdef ENABLE_BATTERY
+      EXECUTE_EVERY_N_MS(BATTERY_MS, read_battery());
+#endif // ENABLE_BATTERY
 
-// #ifdef ENABLE_TOF_SENSORS
-//       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
-// #endif // ENABLE_TOF_SENSORS
+#ifdef ENABLE_TOF_SENSORS
+      EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
+#endif // ENABLE_TOF_SENSORS
 
-//       // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
+      // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 
-//       //////////////////////////////////////////////////////////
-//     }
-//     break;
+      //////////////////////////////////////////////////////////
+    }
+    break;
 
-//   case AGENT_DISCONNECTED:
-//     destroy_entities();
-//     state = WAITING_AGENT;
-//     break;
+  case AGENT_DISCONNECTED:
+    destroy_entities();
+    state = WAITING_AGENT;
+    break;
 
-//   default:
-//     break;
-//   }
+  default:
+    break;
+  }
 }
