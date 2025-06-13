@@ -181,6 +181,6 @@ RUN pip3 install serial pyserial
 
 # Needed to run tycmd 
 USER root
-RUN apt update && apt install -y libusb-1.0-0 && apt clean && rm -rf /var/lib/apt/lists/*
-USER agrobot-docker
+RUN apt update && apt install -y libusb-1.0-0 libudev-dev && apt clean && rm -rf /var/lib/apt/lists/*
 
+USER agrobot-docker

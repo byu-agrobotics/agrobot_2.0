@@ -20,6 +20,7 @@ services:
       - ../tutorial_ws:/home/agrobot-docker/tutorial_ws # Tutorial ROS 2 workspace
       - ../base_scripts/tmuxp/tmp:/home/agrobot-docker/.tmuxp # Temporary tmuxp config files
       - ./startup:/startup # Startup scripts
+      - /run/udev:/run/udev:ro
       - /dev:/dev:rw
       - /etc/udev:/etc/udev:rw
       - /dev/shm:/dev/shm # Required for inter-container communication
