@@ -1,18 +1,18 @@
+#include <Arduino.h>
 #include <SoftwareSerial.h>
 
-// Use regular digital pins for SoftwareSerial (e.g., 10 and 11)
-#define BT_RX_PIN 10  // Teensy RX from HC-05 TX
-#define BT_TX_PIN 11  // Teensy TX to HC-05 RX
+#define BT_RX_PIN 10
+#define BT_TX_PIN 11
 
-SoftwareSerial BTSerial(BT_RX_PIN, BT_TX_PIN); // RX, TX
+SoftwareSerial BTSerial(BT_RX_PIN, BT_TX_PIN);
 
-void setup() {
-  BTSerial.begin(9600);  // HC-05 default baud rate
-  BTSerial.println("Hello from Teensy via Bluetooth!");
+void setup(){
+  BTSerial.begin(9600);
+  BTSerial.println("Hello from Teensy!");
 }
 
-void loop() {
-  BTSerial.println("Ping from Teensy!");
+void loop(){
+  BTSerial.println("ping from Teensy!");
   delay(1000);
 }
 
