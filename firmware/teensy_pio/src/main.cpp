@@ -440,10 +440,6 @@ void read_tof_sensor() {
  */
 void loop() {
 
-  #ifdef ENABLE_BT_DEBUG
-    BTSerial.println("In the void loop");
-  #endif // ENABLE_BT_DEBUG
-
   // blink the indicator light
   if (millis() % 1000 < 250) {
     digitalWrite(LED_PIN, LOW);
@@ -451,65 +447,68 @@ void loop() {
     digitalWrite(LED_PIN, HIGH);
   }
 
-  Servo1.write(90);  // move to 90 degrees
-  delay(2000);
-  Servo1.write(0);   // move to 0 degrees
-  delay(2000);
-  
-  // fail safe for agent disconnect
-  if (millis() - last_received > 5000) {
-
-#ifdef ENABLE_ACTUATORS
-    // TODO: Add actuator stop code here
-#endif // ENABLE_ACTUATORS
-
 #ifdef ENABLE_BT_DEBUG
-    BTSerial.println("[INFO] No command received in timeout, stopping actuators");
+    BTSerial.println("blinking");
 #endif // ENABLE_BT_DEBUG
-  }
+//   Servo1.write(90);  // move to 90 degrees
+//   delay(2000);
+//   Servo1.write(0);   // move to 0 degrees
+//   delay(2000);
+  
+//   // fail safe for agent disconnect
+//   if (millis() - last_received > 5000) {
 
-  // state machine to manage connecting and disconnecting the micro-ROS agent
-  switch (state) {
-  case WAITING_AGENT:
-    EXECUTE_EVERY_N_MS(500, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_AVAILABLE : WAITING_AGENT;);
-    break;
+// #ifdef ENABLE_ACTUATORS
+//     // TODO: Add actuator stop code here
+// #endif // ENABLE_ACTUATORS
 
-  case AGENT_AVAILABLE:
-    state = (true == create_entities()) ? AGENT_CONNECTED : WAITING_AGENT;
-    if (state == WAITING_AGENT) {
-      destroy_entities();
-    };
-    break;
+// #ifdef ENABLE_BT_DEBUG
+//     BTSerial.println("[INFO] No command received in timeout, stopping actuators");
+// #endif // ENABLE_BT_DEBUG
+//   }
 
-//loop that runs when microros agent is connected
-  case AGENT_CONNECTED:
-    EXECUTE_EVERY_N_MS(200, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_CONNECTED : AGENT_DISCONNECTED;);
-    if (state == AGENT_CONNECTED) {
+//   // state machine to manage connecting and disconnecting the micro-ROS agent
+//   switch (state) {
+//   case WAITING_AGENT:
+//     EXECUTE_EVERY_N_MS(500, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_AVAILABLE : WAITING_AGENT;);
+//     break;
+
+//   case AGENT_AVAILABLE:
+//     state = (true == create_entities()) ? AGENT_CONNECTED : WAITING_AGENT;
+//     if (state == WAITING_AGENT) {
+//       destroy_entities();
+//     };
+//     break;
+
+// //loop that runs when microros agent is connected
+//   case AGENT_CONNECTED:
+//     EXECUTE_EVERY_N_MS(200, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_CONNECTED : AGENT_DISCONNECTED;);
+//     if (state == AGENT_CONNECTED) {
       
-      //////////////////////////////////////////////////////////
-      // EXECUTES WHEN THE AGENT IS CONNECTED
-      //////////////////////////////////////////////////////////
+//       //////////////////////////////////////////////////////////
+//       // EXECUTES WHEN THE AGENT IS CONNECTED
+//       //////////////////////////////////////////////////////////
 
-#ifdef ENABLE_BATTERY
-      EXECUTE_EVERY_N_MS(BATTERY_MS, read_battery());
-#endif // ENABLE_BATTERY
+// #ifdef ENABLE_BATTERY
+//       EXECUTE_EVERY_N_MS(BATTERY_MS, read_battery());
+// #endif // ENABLE_BATTERY
 
-#ifdef ENABLE_TOF_SENSORS
-      EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
-#endif // ENABLE_TOF_SENSORS
+// #ifdef ENABLE_TOF_SENSORS
+//       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
+// #endif // ENABLE_TOF_SENSORS
 
-      // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
+//       // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 
-      //////////////////////////////////////////////////////////
-    }
-    break;
+//       //////////////////////////////////////////////////////////
+//     }
+//     break;
 
-  case AGENT_DISCONNECTED:
-    destroy_entities();
-    state = WAITING_AGENT;
-    break;
+//   case AGENT_DISCONNECTED:
+//     destroy_entities();
+//     state = WAITING_AGENT;
+//     break;
 
-  default:
-    break;
-  }
+//   default:
+//     break;
+//   }
 }
