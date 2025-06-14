@@ -256,6 +256,7 @@ void setup() {
 
 #ifdef ENABLE_SERVOS
 Servo1.attach(6);
+BTSerial.println("attached to serial 6)")
 
 #endif // ENABLE_SERVOS
 
