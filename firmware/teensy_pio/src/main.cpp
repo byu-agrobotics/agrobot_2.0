@@ -458,8 +458,8 @@ void loop() {
       Servo1.write(0);
       BTSerial.println("Moved servo1 to 0");
     } else {
-      Servo1.write(90);
-      BTSerial.println("Moved servo1 to 90");
+      Servo1.write(10);
+      BTSerial.println("Moved servo1 to 10");
     }
     servo_at_90 = !servo_at_90;
     last_servo_move = millis();
