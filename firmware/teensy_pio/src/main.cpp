@@ -255,7 +255,8 @@ void setup() {
 #endif // ENABLE_BATTERY
 
 #ifdef ENABLE_SERVOS
-Servo1.attach(6);
+// Servo1.attach(6);
+Servo1.attach(6, 500, 2500);  // Explicit pulse width range in µs
 BTSerial.println("attached to serial 6)");
 
 #endif // ENABLE_SERVOS
@@ -458,8 +459,8 @@ void loop() {
       Servo1.write(0);
       BTSerial.println("Moved servo1 to 0");
     } else {
-      Servo1.write(10);
-      BTSerial.println("Moved servo1 to 10");
+      Servo1.write(90);
+      BTSerial.println("Moved servo1 to 90");
     }
     servo_at_90 = !servo_at_90;
     last_servo_move = millis();
