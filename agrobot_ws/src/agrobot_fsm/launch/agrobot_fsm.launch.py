@@ -7,6 +7,16 @@ def generate_launch_description():
             package='agrobot_fsm',
             executable='collect_fsm',
         ),
-
-        # TODO: Add other FSM nodes
+        launch_ros.actions.Node(
+            package='agrobot_fsm',
+            executable='handle_fsm',
+        ),
+        launch_ros.actions.Node(
+            package='agrobot_fsm',
+            executable='navigate_fsm',
+        ),
+        launch_ros.actions.Node(
+            package='agrobot_fsm',
+            executable='sort_fsm',
+        ),
     ])
