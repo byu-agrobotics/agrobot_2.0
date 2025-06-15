@@ -453,19 +453,29 @@ void loop() {
   }
 
 
-    // Move servo every 2 seconds, non-blockingly
-  if (millis() - last_servo_move > 2000) {
-    if (servo_at_90) {
-      Servo1.write(0);
-      BTSerial.println("Moved servo1 to 0");
-    } else {
-      Servo1.write(90);
-      BTSerial.println("Moved servo1 to 90");
-    }
-    servo_at_90 = !servo_at_90;
-    last_servo_move = millis();
-  }
-  
+  //   // Move servo every 2 seconds, non-blockingly
+  // if (millis() - last_servo_move > 2000) {
+  //   if (servo_at_90) {
+  //     Servo1.write(0);
+  //     BTSerial.println("Moved servo1 to 0");
+  //   } else {
+  //     Servo1.write(90);
+  //     BTSerial.println("Moved servo1 to 90");
+  //   }
+  //   servo_at_90 = !servo_at_90;
+  //   last_servo_move = millis();
+  // }
+
+// test for positional vs rotational servo
+ delay(2000);
+  Servo1.write(0);   // Full one way
+  delay(2000);
+  Servo1.write(180); // Full the other way
+  delay(2000);
+  Servo1.write(90);  // Center (stop, if continuous)
+  delay(2000);
+
+
   // fail safe for agent disconnect
   if (millis() - last_received > 5000) {
 
