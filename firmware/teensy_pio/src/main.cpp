@@ -63,6 +63,7 @@
 #include <SoftwareSerial.h>
 #include <Arduino.h>
 #include <Servo.h>
+#include <LedControl.h>
 // #include <frost_interfaces/msg/u_command.h>
 
 // #define ENABLE_ACTUATORS
@@ -71,6 +72,7 @@
 // #define ENABLE_BATTERY
 #define ENABLE_BT_DEBUG
 #define ENABLE_SERVOS
+#define LED_ENABLE
 
 #define EN1       2                      // EN pin for left TMF8801
 #define EN2       3                      // EN pin for right TMF8801
@@ -103,6 +105,8 @@
 #define LED_PIN 13 // Built-in Teensy LED
 
 Servo Servo1;
+LedControl led = LedControl(12, 11, 10, 1);  // data, clk, cs, numDevices
+
 
 unsigned long last_servo_move = 0;
 bool servo_at_90 = true;
@@ -260,6 +264,13 @@ Servo1.attach(6, 500, 2500);  // Explicit pulse width range in µs
 BTSerial.println("attached to serial 6)");
 
 #endif // ENABLE_SERVOS
+
+
+#ifdef LED_ENABLE 
+led.shutdown(0, false);     // Wake up the MAX7219
+led.setIntensity(0, 8);     // Set brightness 0-15
+led.clearDisplay(0);        // Clear display
+#endif // LED_ENABLE
 
 #ifdef ENABLE_TOF_SENSORS // TODO: Add ifdefs for BTSerial below
   
@@ -452,7 +463,15 @@ void loop() {
     digitalWrite(LED_PIN, HIGH);
   }
 
+    // Turn all LEDs on
+  for (int row = 0; row < 8; row++) {
+    led.setRow(0, row, 0xFF);  // row, data (8 bits)
+  }
+  delay(1000);
 
+  // Turn all LEDs off
+  led.clearDisplay(0);
+  delay(1000);
   //   // Move servo every 2 seconds, non-blockingly
   // if (millis() - last_servo_move > 2000) {
   //   if (servo_at_90) {
