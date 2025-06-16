@@ -7,6 +7,11 @@
   <maintainer email="snelsondurrant@gmail.com">Nelson Durrant</maintainer>
   <license>Apache-2.0</license>
 
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>agrobot_interfaces</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>python3-simple-pid</exec_depend>
+
   <export>
     <build_type>ament_python</build_type>
   </export>
