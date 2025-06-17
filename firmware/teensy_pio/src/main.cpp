@@ -103,6 +103,9 @@
 #define LED_PIN 13 // Built-in Teensy LED
 
 Servo Servo1;
+unsigned long lastChange = 0;
+const unsigned long interval = 3000;  // 3 seconds
+bool forward = true;
 
 // sensor baud rates
 #define BT_DEBUG_RATE 9600
@@ -446,6 +449,19 @@ void loop() {
   } else {
     digitalWrite(LED_PIN, HIGH);
   }
+
+  if (millis() - lastChange > interval) {
+    lastChange = millis();
+
+    if (forward) {
+      myServo.write(180);  // spin forward
+    } else {
+      myServo.write(0);    // spin backward
+    }
+    forward = !forward;  // toggle direction
+  }
+
+
 
   
   // fail safe for agent disconnect
