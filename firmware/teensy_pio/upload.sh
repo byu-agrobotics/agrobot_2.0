@@ -3,6 +3,8 @@
 #
 # Builds and uploads the latest micro-ROS code to the Teensy board
 
+sudo chmod 666 /dev/ttyACM0
+
 cd ~/firmware/teensy_pio
 pio run
 
