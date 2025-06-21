@@ -145,28 +145,28 @@ void error_loop() {
  * @return true if the entities were created successfully, false otherwise
  */
 bool create_entities() {
-BTSerial.println("Starting create_entities...");
 memset(&support, 0, sizeof(rclc_support_t));
-allocator = rcl_get_default_allocator();
-BTSerial.println("Checking allocator...");
-if (allocator.allocate == NULL) {
-  BTSerial.println("Allocator allocate is NULL!");
-  error_loop();
-} else {
-  BTSerial.println("Allocator valid");
-}
-if (rc != RCL_RET_OK) {
-  BTSerial.print("rclc_support_init failed: ");
-  BTSerial.print(rc);
-  BTSerial.print(" - ");
-  BTSerial.println(rcl_get_error_string().str);
-  rcl_reset_error();
-  error_loop();
-}
+  allocator = rcl_get_default_allocator();
 
+  BTSerial.println("Checking allocator...");
+  if (allocator.allocate == NULL) {
+    BTSerial.println("Allocator allocate is NULL!");
+    error_loop();
+  } else {
+    BTSerial.println("Allocator valid");
+  }
 
-RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
-BTSerial.println("Support initialized");
+  BTSerial.println("Initializing support...");
+  rcl_ret_t rc = rclc_support_init(&support, 0, NULL, &allocator);
+  if (rc != RCL_RET_OK) {
+    BTSerial.print("rclc_support_init failed: ");
+    BTSerial.print(rc);
+    BTSerial.print(" - ");
+    BTSerial.println(rcl_get_error_string().str);
+    rcl_reset_error();
+    error_loop();
+  }
+  BTSerial.println("Support initialized");
 
 RCCHECK(rclc_node_init_default(&node, "micro_ros_platformio_node", "", &support));
 BTSerial.println("Node initialized");
