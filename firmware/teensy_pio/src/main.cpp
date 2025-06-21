@@ -1,41 +1,3 @@
-// #include <Arduino.h>
-// #include <SoftwareSerial.h>
-
-// #define BT_MC_RX 34
-// #define BT_MC_TX 35
-
-// SoftwareSerial BTSerial(BT_MC_RX, BT_MC_TX);
-
-// void setup(){
-//   BTSerial.begin(9600);
-//   BTSerial.println("Hello from Teensy!");
-// }
-
-// void loop(){
-//   // BTSerial.println("ping from Teensy!");
-//   delay(1000);
-//   if (BTSerial.available()) {
-//     char c = BTSerial.read();
-//     BTSerial.print("You sent: ");
-//     BTSerial.println(c);
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * @file main.cpp
  * @author Nelson Durrant
@@ -63,6 +25,7 @@
 #include <SoftwareSerial.h>
 #include <Arduino.h>
 #include <Servo.h>
+#include "Servo_sub.h"
 // #include <frost_interfaces/msg/u_command.h>
 
 // #define ENABLE_ACTUATORS
@@ -125,12 +88,16 @@ uint8_t caliDataBuf[14] = {0x41,0x57,0x01,0xFD,0x04,0x00,0x00,0x00,0x00,0x00,0x0
 rclc_support_t support;
 rcl_allocator_t allocator;
 rcl_node_t node;
+rclc_executor_t executor;
 
 // publisher objects
 BatteryPub battery_pub;
 
 // TOF publisher object
 TofPub tof_pub;
+
+// Servo subscriber object
+ServoSub servo_sub;
 
 // sensor objects
 SoftwareSerial BTSerial(BT_MC_RX, BT_MC_TX);
@@ -196,6 +163,9 @@ bool create_entities() {
   battery_pub.setup(node);
   tof_pub.setup(node);
 
+  // create subscriber
+  servo_sub.setup(&node, &executor);
+
 #ifdef ENABLE_BT_DEBUG
   BTSerial.println("[INFO] Micro-ROS entities created successfully");
 #endif // ENABLE_BT_DEBUG
@@ -208,6 +178,7 @@ bool create_entities() {
  * entities (node, publishers, subscribers, and executor).
  */
 void destroy_entities() {
+
   rmw_context_t *rmw_context = rcl_context_get_rmw_context(&support.context);
   (void)rmw_uros_set_context_entity_destroy_session_timeout(rmw_context, 0);
 
@@ -455,7 +426,6 @@ void loop() {
 
   // little blue servos are directional, 180 means forwward, 0 means backwawrd, not positional at all. Perfect for opening up the gates
   // and only need 5V, GRND, and one pin from the teensy
-
   if (millis() - lastChange > interval) {
     lastChange = millis();
 
@@ -468,26 +438,27 @@ void loop() {
     }
 
 
-   // testing large servo here, pin 21 
 
+   // testing large servo here, pin 21 
   for (int pos = 0; pos <= 180; pos++) {
     bigServo.write(pos);
     delay(10);  // Adjust for speed; lower = faster
   }
-
   delay(500);  // Pause at the end
-
   // Sweep from 180 back to 0 degrees
   for (int pos = 180; pos >= 0; pos--) {
     bigServo.write(pos);
     delay(10);
   }
-
   delay(500);
+
+
 
   
   // fail safe for agent disconnect
   if (millis() - last_received > 5000) {
+
+
 
 #ifdef ENABLE_ACTUATORS
     // TODO: Add actuator stop code here
@@ -529,7 +500,17 @@ void loop() {
       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
 #endif // ENABLE_TOF_SENSORS
 
-      // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
+
+#ifdef ENABLE_SERVOS
+  float s1 = servo_sub.get_servo1_angle();
+  float s2 = servo_sub.get_servo2_angle();
+  float s3 = servo_sub.get_servo3_angle();
+  float s4 = servo_sub.get_servo4_angle();
+  BTerial.println(s1, s2, s3, s4)
+
+#endif // ENABLE_SERVOS
+
+      rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 
       //////////////////////////////////////////////////////////
     }
