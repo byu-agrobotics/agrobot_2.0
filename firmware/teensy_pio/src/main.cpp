@@ -145,6 +145,35 @@ void error_loop() {
  * @return true if the entities were created successfully, false otherwise
  */
 bool create_entities() {
+BTSerial.println("Starting create_entities...");
+
+RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
+BTSerial.println("Support initialized");
+
+RCCHECK(rclc_node_init_default(&node, "micro_ros_platformio_node", "", &support));
+BTSerial.println("Node initialized");
+
+// Initialize executor here:
+RCCHECK(rclc_executor_init(&executor, &support.context, 3, &allocator));
+BTSerial.println("Executor initialized");
+
+// Timestamp sync
+RCCHECK(rmw_uros_sync_session(SYNC_TIMEOUT));
+BTSerial.println("Timestamp synchronized");
+
+battery_pub.setup(node);
+tof_pub.setup(node);
+
+servo_sub.setup(&node, &executor);
+BTSerial.println("Entities setup done");
+
+return true;
+
+
+
+
+
+
 
   // the allocator object wraps the dynamic memory allocation and deallocation
   // methods used in micro-ROS
@@ -158,29 +187,26 @@ bool create_entities() {
   // functions
   RCCHECK(rmw_uros_sync_session(SYNC_TIMEOUT));
 
-#ifdef ENABLE_BT_DEBUG
-  if (!rmw_uros_epoch_synchronized()) {
-    BTSerial.println("[ERROR] Could not synchronize timestamps with agent");
-  } else {
-    BTSerial.println("[INFO] Timestamps synchronized with agent");
-  }
-#endif // ENABLE_BT_DEBUG
+// #ifdef ENABLE_BT_DEBUG
+//   if (!rmw_uros_epoch_synchronized()) {
+//     BTSerial.println("[ERROR] Could not synchronize timestamps with agent");
+//   } else {
+//     BTSerial.println("[INFO] Timestamps synchronized with agent");
+//   }
+// #endif // ENABLE_BT_DEBUG
 
-  // create publishers
-  battery_pub.setup(node);
-  tof_pub.setup(node);
+//   // create publishers
+//   battery_pub.setup(node);
+//   tof_pub.setup(node);
+  
+//   // create subscriber
+//   servo_sub.setup(&node, &executor);
 
-RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
+// #ifdef ENABLE_BT_DEBUG
+//   BTSerial.println("[INFO] Micro-ROS entities created successfully");
+// #endif // ENABLE_BT_DEBUG
 
-
-  // create subscriber
-  servo_sub.setup(&node, &executor);
-
-#ifdef ENABLE_BT_DEBUG
-  BTSerial.println("[INFO] Micro-ROS entities created successfully");
-#endif // ENABLE_BT_DEBUG
-
-  return true;
+//   return true;
 }
 
 /**
