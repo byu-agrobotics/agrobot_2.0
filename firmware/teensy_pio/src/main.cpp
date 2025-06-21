@@ -442,13 +442,13 @@ void loop() {
    // testing large servo here, pin 21 
   for (int pos = 0; pos <= 180; pos++) {
     bigServo.write(pos);
-    delay(10);  // Adjust for speed; lower = faster
+    // delay(10);  // Adjust for speed; lower = faster
   }
   delay(500);  // Pause at the end
   // Sweep from 180 back to 0 degrees
   for (int pos = 180; pos >= 0; pos--) {
     bigServo.write(pos);
-    delay(10);
+    // delay(10);
   }
   delay(500);
 
@@ -459,6 +459,10 @@ void loop() {
   if (millis() - last_received > 5000) {
 
 
+
+
+
+rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
 
 #ifdef ENABLE_ACTUATORS
     // TODO: Add actuator stop code here
@@ -506,14 +510,13 @@ void loop() {
   float s2 = servo_sub.get_servo2_angle();
   float s3 = servo_sub.get_servo3_angle();
   float s4 = servo_sub.get_servo4_angle();
+  BTSerial.print("Servo 1: ");
   BTSerial.println(s1);
-  BTSerial.println(s2);
-  BTSerial.println(s3);
-  BTSerial.println(s4);
+
 
 #endif // ENABLE_SERVOS
 
-      rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
+      // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 
       //////////////////////////////////////////////////////////
     }
