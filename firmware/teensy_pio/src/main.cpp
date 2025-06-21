@@ -454,9 +454,9 @@ void loop() {
     lastChange = millis();
 
     if (forward) {
-      myServo.write(180);  // spin forward
+      Servo1.write(180);  // spin forward
     } else {
-      myServo.write(0);    // spin backward
+      Servo1.write(0);    // spin backward
     }
     forward = !forward;  // toggle direction
   }
