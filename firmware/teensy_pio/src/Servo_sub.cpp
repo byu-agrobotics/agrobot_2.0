@@ -33,8 +33,8 @@ void ServoSub::callback(const void* msgin) {
   servo4_angle = msg->servo4;
 }
 
-// // Optional getters if used
-// float ServoSub::get_servo1_angle() { return servo1_angle; }
-// float ServoSub::get_servo2_angle() { return servo2_angle; }
-// float ServoSub::get_servo3_angle() { return servo3_angle; }
-// float ServoSub::get_servo4_angle() { return servo4_angle; }
+// Optional getters if used
+float ServoSub::get_servo1_angle() { return servo1_angle; }
+float ServoSub::get_servo2_angle() { return servo2_angle; }
+float ServoSub::get_servo3_angle() { return servo3_angle; }
+float ServoSub::get_servo4_angle() { return servo4_angle; }
