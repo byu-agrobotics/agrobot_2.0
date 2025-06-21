@@ -496,6 +496,8 @@ rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
       // EXECUTES WHEN THE AGENT IS CONNECTED
       //////////////////////////////////////////////////////////
 
+
+
 #ifdef ENABLE_BATTERY
       EXECUTE_EVERY_N_MS(BATTERY_MS, read_battery());
 #endif // ENABLE_BATTERY
@@ -506,6 +508,19 @@ rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
 
 
 #ifdef ENABLE_SERVOS
+   // testing large servo here, pin 21 
+  for (int pos = 0; pos <= 180; pos++) {
+    bigServo.write(pos);
+    delay(10);  // Adjust for speed; lower = faster
+  }
+  delay(500);  // Pause at the end
+  // Sweep from 180 back to 0 degrees
+  for (int pos = 180; pos >= 0; pos--) {
+    bigServo.write(pos);
+    delay(10);
+  }
+  delay(500);
+  
   float s1 = servo_sub.get_servo1_angle();
   float s2 = servo_sub.get_servo2_angle();
   float s3 = servo_sub.get_servo3_angle();
