@@ -506,7 +506,7 @@ void loop() {
   float s2 = servo_sub.get_servo2_angle();
   float s3 = servo_sub.get_servo3_angle();
   float s4 = servo_sub.get_servo4_angle();
-  BTserial.println(s1, s2, s3, s4)
+  BTSerial.println(s1, s2, s3, s4)
 
 #endif // ENABLE_SERVOS
 
