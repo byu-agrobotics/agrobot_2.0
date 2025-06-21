@@ -411,7 +411,6 @@ void read_tof_sensor() {
 }
 
 
-
 void loop() {
   // Blink LED non-blocking
   if (millis() % 1000 < 250) {
@@ -420,56 +419,59 @@ void loop() {
     digitalWrite(LED_PIN, HIGH);
   }
 
-  // Fail safe for agent disconnect
-  if (millis() - last_received > 5000) {
-    // TODO: actuator stop code
-  }
-
-  // State machine for micro-ROS agent connection
+  // State machine simplified for testing
   switch (state) {
     case WAITING_AGENT:
-      EXECUTE_EVERY_N_MS(500,
+      // Just ping agent every 500 ms
+      if (millis() - lastAgentPing > 500) {
+        lastAgentPing = millis();
         state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_AVAILABLE : WAITING_AGENT;
-      );
+        BTSerial.println("Pinging agent...");
+      }
       break;
 
     case AGENT_AVAILABLE:
-      state = (true == create_entities()) ? AGENT_CONNECTED : WAITING_AGENT;
-      if (state == WAITING_AGENT) {
-        destroy_entities();
+      BTSerial.println("Agent available, creating entities...");
+      if (create_entities()) {
+        state = AGENT_CONNECTED;
+      } else {
+        state = WAITING_AGENT;
       }
       break;
 
     case AGENT_CONNECTED:
-      EXECUTE_EVERY_N_MS(200,
-        state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_CONNECTED : AGENT_DISCONNECTED;
-      );
-
-      if (state == AGENT_CONNECTED) {
-        // Non-blocking servo sweep every 10 ms
-        if (millis() - lastServoMove > 10) {
-          lastServoMove = millis();
-          bigServo.write(servoPos);
-          servoPos += servoStep;
-          if (servoPos >= 180 || servoPos <= 0) {
-            servoStep = -servoStep;
-          }
+      if (millis() - lastAgentPing > 200) {
+        lastAgentPing = millis();
+        if (RMW_RET_OK != rmw_uros_ping_agent(100, 1)) {
+          state = AGENT_DISCONNECTED;
+          BTSerial.println("Agent disconnected!");
+          break;
         }
+      }
 
-        // Spin micro-ROS executor to process callbacks
-        rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
-
-        // Print servo angle periodically
-        static unsigned long lastPrint = 0;
-        if (millis() - lastPrint > 500) {
-          lastPrint = millis();
-          BTSerial.print("Servo pos: ");
-          BTSerial.println(servoPos);
+      // Non-blocking servo sweep every 10 ms
+      if (millis() - lastServoMove > 10) {
+        lastServoMove = millis();
+        bigServo.write(servoPos);
+        servoPos += servoStep;
+        if (servoPos >= 180 || servoPos <= 0) {
+          servoStep = -servoStep;
         }
+      }
+
+      // Process micro-ROS executor callbacks
+      rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
+
+      // Debug print servo position every 500 ms
+      if (millis() - lastPrint > 500) {
+        lastPrint = millis();
+        BTSerial.print("Servo pos: ");
+        BTSerial.println(servoPos);
       }
       break;
 
     case AGENT_DISCONNECTED:
+      BTSerial.println("Destroying entities and returning to WAITING_AGENT");
       destroy_entities();
       state = WAITING_AGENT;
       break;
@@ -478,18 +480,13 @@ void loop() {
       break;
   }
 
-  // Blink small directional servo independently and non-blocking (optional)
+  // Blink blue servo toggling every second independently
   if (millis() - lastChange > interval) {
     lastChange = millis();
-    if (forward) {
-      blueServo.write(180);
-    } else {
-      blueServo.write(0);
-    }
+    blueServo.write(forward ? 180 : 0);
     forward = !forward;
   }
 }
-
 
 
 
