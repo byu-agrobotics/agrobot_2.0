@@ -146,6 +146,24 @@ void error_loop() {
  */
 bool create_entities() {
 BTSerial.println("Starting create_entities...");
+memset(&support, 0, sizeof(rclc_support_t));
+allocator = rcl_get_default_allocator();
+BTSerial.println("Checking allocator...");
+if (allocator.allocate == NULL) {
+  BTSerial.println("Allocator allocate is NULL!");
+  error_loop();
+} else {
+  BTSerial.println("Allocator valid");
+}
+if (rc != RCL_RET_OK) {
+  BTSerial.print("rclc_support_init failed: ");
+  BTSerial.print(rc);
+  BTSerial.print(" - ");
+  BTSerial.println(rcl_get_error_string().str);
+  rcl_reset_error();
+  error_loop();
+}
+
 
 RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
 BTSerial.println("Support initialized");
