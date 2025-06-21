@@ -412,140 +412,244 @@ void read_tof_sensor() {
 
 
 
-/**
- * This function is the main loop for the micro-ROS node. It manages the
- * connection and disconnection of the micro-ROS agent, actuator positions,
- * and sensor data collection.
- */
 void loop() {
-
-  // blink the indicator light
+  // Blink LED non-blocking
   if (millis() % 1000 < 250) {
     digitalWrite(LED_PIN, LOW);
   } else {
     digitalWrite(LED_PIN, HIGH);
   }
 
+  // Fail safe for agent disconnect
+  if (millis() - last_received > 5000) {
+    // TODO: actuator stop code
+  }
 
-  // // little blue servos are directional, 180 means forwward, 0 means backwawrd, not positional at all. Perfect for opening up the gates
-  // // and only need 5V, GRND, and one pin from the teensy
-  // if (millis() - lastChange > interval) {
-  //   lastChange = millis();
+  // State machine for micro-ROS agent connection
+  switch (state) {
+    case WAITING_AGENT:
+      EXECUTE_EVERY_N_MS(500,
+        state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_AVAILABLE : WAITING_AGENT;
+      );
+      break;
 
-  //   if (forward) {
-  //     blueServo.write(180);  // spin forward
-  //   } else {
-  //     blueServo.write(0);    // spin backward
-  //   }
-  //   forward = !forward;  // toggle direction
-  //   }
+    case AGENT_AVAILABLE:
+      state = (true == create_entities()) ? AGENT_CONNECTED : WAITING_AGENT;
+      if (state == WAITING_AGENT) {
+        destroy_entities();
+      }
+      break;
+
+    case AGENT_CONNECTED:
+      EXECUTE_EVERY_N_MS(200,
+        state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_CONNECTED : AGENT_DISCONNECTED;
+      );
+
+      if (state == AGENT_CONNECTED) {
+        // Non-blocking servo sweep every 10 ms
+        if (millis() - lastServoMove > 10) {
+          lastServoMove = millis();
+          bigServo.write(servoPos);
+          servoPos += servoStep;
+          if (servoPos >= 180 || servoPos <= 0) {
+            servoStep = -servoStep;
+          }
+        }
+
+        // Spin micro-ROS executor to process callbacks
+        rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
+
+        // Print servo angle periodically
+        static unsigned long lastPrint = 0;
+        if (millis() - lastPrint > 500) {
+          lastPrint = millis();
+          BTSerial.print("Servo pos: ");
+          BTSerial.println(servoPos);
+        }
+      }
+      break;
+
+    case AGENT_DISCONNECTED:
+      destroy_entities();
+      state = WAITING_AGENT;
+      break;
+
+    default:
+      break;
+  }
+
+  // Blink small directional servo independently and non-blocking (optional)
+  if (millis() - lastChange > interval) {
+    lastChange = millis();
+    if (forward) {
+      blueServo.write(180);
+    } else {
+      blueServo.write(0);
+    }
+    forward = !forward;
+  }
+}
 
 
 
-  //  // testing large servo here, pin 21 
-  // for (int pos = 0; pos <= 180; pos++) {
-  //   bigServo.write(pos);
-  //   // delay(10);  // Adjust for speed; lower = faster
-  // }
-  // delay(500);  // Pause at the end
-  // // Sweep from 180 back to 0 degrees
-  // for (int pos = 180; pos >= 0; pos--) {
-  //   bigServo.write(pos);
-  //   // delay(10);
-  // }
-  // delay(500);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /**
+//  * This function is the main loop for the micro-ROS node. It manages the
+//  * connection and disconnection of the micro-ROS agent, actuator positions,
+//  * and sensor data collection.
+//  */
+// void loop() {
+
+//   // blink the indicator light
+//   if (millis() % 1000 < 250) {
+//     digitalWrite(LED_PIN, LOW);
+//   } else {
+//     digitalWrite(LED_PIN, HIGH);
+//   }
+
+
+//   // // little blue servos are directional, 180 means forwward, 0 means backwawrd, not positional at all. Perfect for opening up the gates
+//   // // and only need 5V, GRND, and one pin from the teensy
+//   // if (millis() - lastChange > interval) {
+//   //   lastChange = millis();
+
+//   //   if (forward) {
+//   //     blueServo.write(180);  // spin forward
+//   //   } else {
+//   //     blueServo.write(0);    // spin backward
+//   //   }
+//   //   forward = !forward;  // toggle direction
+//   //   }
+
+
+
+//   //  // testing large servo here, pin 21 
+//   // for (int pos = 0; pos <= 180; pos++) {
+//   //   bigServo.write(pos);
+//   //   // delay(10);  // Adjust for speed; lower = faster
+//   // }
+//   // delay(500);  // Pause at the end
+//   // // Sweep from 180 back to 0 degrees
+//   // for (int pos = 180; pos >= 0; pos--) {
+//   //   bigServo.write(pos);
+//   //   // delay(10);
+//   // }
+//   // delay(500);
 
 
 
   
-  // fail safe for agent disconnect
-  if (millis() - last_received > 5000) {
+//   // fail safe for agent disconnect
+//   if (millis() - last_received > 5000) {
 
 
 
 
 
-rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
+// rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
 
-#ifdef ENABLE_ACTUATORS
-    // TODO: Add actuator stop code here
-#endif // ENABLE_ACTUATORS
+// #ifdef ENABLE_ACTUATORS
+//     // TODO: Add actuator stop code here
+// #endif // ENABLE_ACTUATORS
 
-// #ifdef ENABLE_BT_DEBUG   // this is useless, we aren't receiving information through bluetooth
-//     BTSerial.println("[INFO] No command received in timeout, stopping actuators");
-// #endif // ENABLE_BT_DEBUG
+// // #ifdef ENABLE_BT_DEBUG   // this is useless, we aren't receiving information through bluetooth
+// //     BTSerial.println("[INFO] No command received in timeout, stopping actuators");
+// // #endif // ENABLE_BT_DEBUG
 
-  }
+//   }
 
-  // state machine to manage connecting and disconnecting the micro-ROS agent
-  switch (state) {
-  case WAITING_AGENT:
-    EXECUTE_EVERY_N_MS(500, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_AVAILABLE : WAITING_AGENT;);
-    break;
+//   // state machine to manage connecting and disconnecting the micro-ROS agent
+//   switch (state) {
+//   case WAITING_AGENT:
+//     EXECUTE_EVERY_N_MS(500, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_AVAILABLE : WAITING_AGENT;);
+//     break;
 
-  case AGENT_AVAILABLE:
-    state = (true == create_entities()) ? AGENT_CONNECTED : WAITING_AGENT;
-    if (state == WAITING_AGENT) {
-      destroy_entities();
-    };
-    break;
+//   case AGENT_AVAILABLE:
+//     state = (true == create_entities()) ? AGENT_CONNECTED : WAITING_AGENT;
+//     if (state == WAITING_AGENT) {
+//       destroy_entities();
+//     };
+//     break;
 
-//loop that runs when microros agent is connected
-  case AGENT_CONNECTED:
-    EXECUTE_EVERY_N_MS(200, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_CONNECTED : AGENT_DISCONNECTED;);
-    if (state == AGENT_CONNECTED) {
+// //loop that runs when microros agent is connected
+//   case AGENT_CONNECTED:
+//     EXECUTE_EVERY_N_MS(200, state = (RMW_RET_OK == rmw_uros_ping_agent(100, 1)) ? AGENT_CONNECTED : AGENT_DISCONNECTED;);
+//     if (state == AGENT_CONNECTED) {
       
-      //////////////////////////////////////////////////////////
-      // EXECUTES WHEN THE AGENT IS CONNECTED
-      //////////////////////////////////////////////////////////
+//       //////////////////////////////////////////////////////////
+//       // EXECUTES WHEN THE AGENT IS CONNECTED
+//       //////////////////////////////////////////////////////////
 
 
 
-#ifdef ENABLE_BATTERY
-      EXECUTE_EVERY_N_MS(BATTERY_MS, read_battery());
-#endif // ENABLE_BATTERY
+// #ifdef ENABLE_BATTERY
+//       EXECUTE_EVERY_N_MS(BATTERY_MS, read_battery());
+// #endif // ENABLE_BATTERY
 
-#ifdef ENABLE_TOF_SENSORS
-      EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
-#endif // ENABLE_TOF_SENSORS
-
-
-#ifdef ENABLE_SERVOS
+// #ifdef ENABLE_TOF_SENSORS
+//       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
+// #endif // ENABLE_TOF_SENSORS
 
 
-// Non-blocking servo sweep:
-    if (millis() - lastServoMove > 10) { // move every 10 ms
-      lastServoMove = millis();
-
-      bigServo.write(servoPos);
-      servoPos += servoStep;
-      if (servoPos >= 180 || servoPos <= 0) {
-        servoStep = -servoStep; // reverse direction
-      }
-    }
-
-  float s1 = servo_sub.get_servo1_angle();
-  float s2 = servo_sub.get_servo2_angle();
-  float s3 = servo_sub.get_servo3_angle();
-  float s4 = servo_sub.get_servo4_angle();
-  BTSerial.print("Servo 1: ");
-  BTSerial.println(s1);
+// #ifdef ENABLE_SERVOS
 
 
-#endif // ENABLE_SERVOS
+// // Non-blocking servo sweep:
+//     if (millis() - lastServoMove > 10) { // move every 10 ms
+//       lastServoMove = millis();
 
-      // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
+//       bigServo.write(servoPos);
+//       servoPos += servoStep;
+//       if (servoPos >= 180 || servoPos <= 0) {
+//         servoStep = -servoStep; // reverse direction
+//       }
+//     }
 
-      //////////////////////////////////////////////////////////
-    }
-    break;
+//   float s1 = servo_sub.get_servo1_angle();
+//   float s2 = servo_sub.get_servo2_angle();
+//   float s3 = servo_sub.get_servo3_angle();
+//   float s4 = servo_sub.get_servo4_angle();
+//   BTSerial.print("Servo 1: ");
+//   BTSerial.println(s1);
 
-  case AGENT_DISCONNECTED:
-    destroy_entities();
-    state = WAITING_AGENT;
-    break;
 
-  default:
-    break;
-  }
-}
+// #endif // ENABLE_SERVOS
+
+//       // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
+
+//       //////////////////////////////////////////////////////////
+//     }
+//     break;
+
+//   case AGENT_DISCONNECTED:
+//     destroy_entities();
+//     state = WAITING_AGENT;
+//     break;
+
+//   default:
+//     break;
+//   }
+// }
