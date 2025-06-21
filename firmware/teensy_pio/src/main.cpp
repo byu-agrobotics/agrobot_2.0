@@ -255,7 +255,7 @@ void setup() {
 #endif // ENABLE_BATTERY
 
 #ifdef ENABLE_SERVOS
-Servo1.attach(6);
+Servo1.attach(20);
 
 #endif // ENABLE_SERVOS
 
