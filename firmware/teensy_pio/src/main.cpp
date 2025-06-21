@@ -170,6 +170,9 @@ bool create_entities() {
   battery_pub.setup(node);
   tof_pub.setup(node);
 
+RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
+
+
   // create subscriber
   servo_sub.setup(&node, &executor);
 
