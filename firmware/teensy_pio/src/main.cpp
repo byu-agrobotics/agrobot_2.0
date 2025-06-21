@@ -67,12 +67,16 @@
 
 Servo blueServo;
 Servo bigServo;
-unsigned long lastChange = 0;
-const unsigned long interval = 3000;  // 3 seconds
-bool forward = true;
 unsigned long lastServoMove = 0;
+unsigned long lastAgentPing = 0;
+unsigned long lastPrint = 0;
+unsigned long lastChange = 0;
+
 int servoPos = 0;
 int servoStep = 1;
+
+bool forward = true;
+const unsigned long interval = 1000;
 
 // sensor baud rates
 #define BT_DEBUG_RATE 9600
