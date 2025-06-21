@@ -1,15 +1,16 @@
 #ifndef SERVO_SUB
 #define SERVO_SUB
 
-#include "subscription.h"
+#include "subscriber.h"  // Your base subscriber class
 #include <Wire.h>
 #include <agrobot_interfaces/msg/servo_command.h>
 
-
-
-class ServoSub {
+/**
+ * @brief Subscriber for /servo/command topic using agrobot_interfaces/msg/ServoCommand
+ */
+class ServoSub : public Subscriber {
 public:
-  void setup(rcl_node_t* node, rclc_executor_t* executor);
+  void setup(rcl_node_t* node, rclc_executor_t* executor) override;
 
   float get_servo1_angle();
   float get_servo2_angle();
@@ -17,7 +18,6 @@ public:
   float get_servo4_angle();
 
 private:
-  rcl_subscription_t subscriber;
   agrobot_interfaces__msg__ServoCommand msg;
 
   static void callback(const void* msgin);
@@ -28,4 +28,4 @@ private:
   static float servo4_angle;
 };
 
-#endif  // SERVO_SUB_H
+#endif  // SERVO_SUB
