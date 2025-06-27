@@ -140,6 +140,12 @@ class EggID(Node):
             self.get_logger().info(f"\t\tArea total: {totalArea}")
             characterics[egg_type] = totalArea
 
+            # Check for no egg present based on total detected areas
+            if characterics["good"] < 1000 and characterics["bad"] < 1000:
+                self.get_logger().info("No egg detected.")
+                response.egg_type = 0  # 0 = no egg detected
+                return response
+
         # Save the image for debugging
         # Compare egg types
         egg_type = 3

@@ -532,37 +532,37 @@ void loop() {
   }
 
 
-  // little blue servos are directional, 180 means forwward, 0 means backwawrd, not positional at all. Perfect for opening up the gates
-  // and only need 5V, GRND, and one pin from the teensy
+  // // little blue servos are directional, 180 means forwward, 0 means backwawrd, not positional at all. Perfect for opening up the gates
+  // // and only need 5V, GRND, and one pin from the teensy
 
-  if (millis() - lastChange > interval) {
-    lastChange = millis();
+  // if (millis() - lastChange > interval) {
+  //   lastChange = millis();
 
-    if (forward) {
-      blueServo.write(180);  // spin forward
-    } else {
-      blueServo.write(0);    // spin backward
-    }
-    forward = !forward;  // toggle direction
-    }
+  //   if (forward) {
+  //     blueServo.write(180);  // spin forward
+  //   } else {
+  //     blueServo.write(0);    // spin backward
+  //   }
+  //   forward = !forward;  // toggle direction
+  //   }
 
 
-   // testing large servo here, pin 21 
+  //  // testing large servo here, pin 21 
 
-  for (int pos = 0; pos <= 180; pos++) {
-    bigServo.write(pos);
-    delay(10);  // Adjust for speed; lower = faster
-  }
+  // for (int pos = 0; pos <= 180; pos++) {
+  //   bigServo.write(pos);
+  //   delay(10);  // Adjust for speed; lower = faster
+  // }
 
-  delay(500);  // Pause at the end
+  // delay(500);  // Pause at the end
 
-  // Sweep from 180 back to 0 degrees
-  for (int pos = 180; pos >= 0; pos--) {
-    bigServo.write(pos);
-    delay(10);
-  }
+  // // Sweep from 180 back to 0 degrees
+  // for (int pos = 180; pos >= 0; pos--) {
+  //   bigServo.write(pos);
+  //   delay(10);
+  // }
 
-  delay(500);
+  // delay(500);
 
   
   // fail safe for agent disconnect

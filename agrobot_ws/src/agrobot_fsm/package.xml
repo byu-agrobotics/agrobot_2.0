@@ -12,9 +12,11 @@
   
   <build_depend>rosidl_default_runtime</build_depend>
   <build_depend>agrobot_interfaces</build_depend>
+  <build_depend>rclpy</build_depend>
 
   <exec_depend>rosidl_default_runtime</exec_depend>
   <exec_depend>agrobot_interfaces</exec_depend>
+  <exec_depend>rclpy</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>
