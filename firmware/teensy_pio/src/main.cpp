@@ -49,7 +49,7 @@
  * - TODO: Add other subscribers
  *
  * Publishes:
- * - battery_status (agagrobot_interfaces/msg/BatteryStatus)
+ * - battery_status (agrobot_interfaces/msg/BatteryStatus)
  * - TODO: Add other publishers
  *
  *
@@ -61,8 +61,8 @@
 #include "tof_pub.h"
 #include "DFRobot_TMF8x01.h"
 #include <SoftwareSerial.h>
-#include <Arduino.h>
 #include <Servo.h>
+
 // #include <frost_interfaces/msg/u_command.h>
 
 // #define ENABLE_ACTUATORS
@@ -607,6 +607,26 @@ void loop() {
 #ifdef ENABLE_TOF_SENSORS
       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
 #endif // ENABLE_TOF_SENSORS
+
+// #ifdef ENABLE_BIG_HBRIDGE
+//       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
+// #endif // ENABLE_BIG_HBRIDGE
+
+// #ifdef ENABLE_SMALL_HBRIDGE
+//       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
+// #endif // ENABLE_SMALL_HBRIDGE
+
+// #ifdef ENABLE_IR_SENSOR
+//       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
+// #endif // ENABLE_IR_SENSOR
+
+// #ifdef ENABLE_SERVOS
+//       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
+// #endif // ENABLE_SERVOS
+
+// #ifdef ENABLE_LED_MATRIX
+//       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
+// #endif // ENABLE_LED_MATRIX
 
       // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 

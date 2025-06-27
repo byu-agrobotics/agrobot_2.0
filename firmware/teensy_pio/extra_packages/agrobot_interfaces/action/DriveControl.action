@@ -1,0 +1,9 @@
+# Goal section is empty
+---
+# Result
+bool success
+---
+# Feedback
+float32 forward_error
+float32 lateral_error
+int32 stability_count

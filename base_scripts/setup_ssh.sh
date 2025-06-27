@@ -6,7 +6,7 @@
 script_dir=$(dirname "$(readlink -f "$0")")
 source $script_dir/base_common.sh
 
-# Check for a "-u <username>" argument
+# Check for "-u <username>" or "-p <password>" arguments
 while getopts ":u:p:" opt; do
   case $opt in
     u)

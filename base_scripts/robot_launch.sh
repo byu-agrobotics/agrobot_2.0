@@ -6,14 +6,11 @@
 script_dir=$(dirname "$(readlink -f "$0")")
 source $script_dir/base_common.sh
 
-# Check for a "-t <task>" or "-u <username>" argument
-while getopts ":t:u:" opt; do
+# Check for a "-u <username>" argument
+while getopts ":u:" opt; do
   case $opt in
     u)
       ROBOT_USERNAME=$OPTARG
-      ;;
-    t)
-      task=$OPTARG
       ;;
   esac
 done

@@ -4,7 +4,9 @@ import launch_ros.actions
 def generate_launch_description():
     return launch.LaunchDescription([
         launch_ros.actions.Node(
-            package='agrobot_perception',
-            executable='egg_id',
+            package='agrobot_fsm',
+            executable='collect_fsm',
         ),
+
+        # TODO: Add other FSM nodes
     ])

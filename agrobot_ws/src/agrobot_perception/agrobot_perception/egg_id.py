@@ -69,6 +69,11 @@ class EggID(Node):
         """
 
         self.get_logger().info("Received request to identify an egg!")
+
+        # TODO: GET RID OF THE BELOW LATER (JUST FOR TESTING RN BC NO CAMERA CONNECTED)
+        response.egg_type = 1  # 1: small, 2: large, 3: bad
+        return response
+
         image = self.read()
 
         # Helpful debugging code
