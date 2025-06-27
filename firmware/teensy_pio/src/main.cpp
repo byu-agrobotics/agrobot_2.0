@@ -101,12 +101,17 @@
 #define VOLT_PIN 18
 #define CURRENT_PIN 17
 #define LED_PIN 13 // Built-in Teensy LED
+#define SERVO_PIN1 20
+#define SERVO_PIN2 21
+#define SERVO_PIN3 22
+#define SERVO_PIN4 23
 
-Servo blueServo;
-Servo bigServo;
-unsigned long lastChange = 0;
-const unsigned long interval = 3000;  // 3 seconds
-bool forward = true;
+// default servo positions
+#define DEFAULT_SERVO 90
+
+// servo conversion values
+#define SERVO_OUT_HIGH 2500
+#define SERVO_OUT_LOW 500
 
 // sensor baud rates
 #define BT_DEBUG_RATE 9600
@@ -125,6 +130,14 @@ uint8_t caliDataBuf[14] = {0x41,0x57,0x01,0xFD,0x04,0x00,0x00,0x00,0x00,0x00,0x0
 rclc_support_t support;
 rcl_allocator_t allocator;
 rcl_node_t node;
+rclc_executor_t executor;
+
+// message objects
+agrobot_interfaces__msg__ServoCommand servo_msg;
+
+// subscriber objects
+rcl_subscription_t servo_sub;
+
 
 // publisher objects
 BatteryPub battery_pub;
@@ -145,6 +158,17 @@ float right_distance = -1;
 float front_distance = -1;
 float back_distance = -1;
 
+// servo objects
+Servo myServo1; // Large egg
+Servo myServo2; // Small egg
+Servo myServo3; // Bad egg
+Servo myServo4; // sorting servo
+
+unsigned long lastChange = 0;
+const unsigned long interval = 3000;  // 3 seconds
+bool forward = true;
+
+
 // states for state machine in loop function
 enum states {
   WAITING_AGENT,
@@ -161,6 +185,35 @@ void error_loop() {
     BTSerial.println("[ERROR] In error loop");
 #endif // ENABLE_BT_DEBUG
   }
+}
+
+
+/**
+ * Callback function for the "/servo" subscriber. This function is
+ * called whenever a new servo command is received from the micro-ROS agent.
+ *
+ * @param servo_msgin The received agrobot_interfaces/msg/ServoCommand message
+ */
+void servo_sub_callback(const void *servo_msgin) {
+
+  last_received = millis();
+
+  const agrobot_interfaces__msg__ServoCommand *servo_msg =
+      (const agrobot_interfaces__msg__ServoCommand *)servo_msgin;
+
+#ifdef ENABLE_SERVOS
+  myServo1.write(servo_msg->servo1); // large egg deposit
+  myServo2.write(servo_msg->servo2); // small egg deposit
+  myServo3.write(servo_msg->servo3); // bad egg deposit
+#endif                                                 // ENABLE_SERVOS
+
+
+#ifdef ENABLE_BT_DEBUG
+  BTSerial.println("[INFO] Command Received: " + String(servo_msg->servo1) +
+                   " " + String(servo_msg->servo2) + " " +
+                   String(servo_msg->servo3) + " " +
+                   String(servo_msg->servo4));
+#endif // ENABLE_BT_DEBUG
 }
 
 /**
@@ -195,6 +248,21 @@ bool create_entities() {
   // create publishers
   battery_pub.setup(node);
   tof_pub.setup(node);
+
+    // create subscribers
+  RCCHECK(rclc_subscription_init_default(
+      &servo_sub, &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
+      NAMESPACE "/servos"));
+
+       // create executor
+  RCSOFTCHECK(rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL,
+                                 &allocator));
+
+  // add callbacks to executor
+  RCSOFTCHECK(
+      rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
+                                     &servo_sub_callback, ON_NEW_DATA));
 
 #ifdef ENABLE_BT_DEBUG
   BTSerial.println("[INFO] Micro-ROS entities created successfully");
@@ -256,8 +324,19 @@ void setup() {
 #endif // ENABLE_BATTERY
 
 #ifdef ENABLE_SERVOS
-blueServo.attach(20);
-bigServo.attach(21);
+  pinMode(SERVO_PIN1, OUTPUT);
+  pinMode(SERVO_PIN2, OUTPUT);
+  pinMode(SERVO_PIN3, OUTPUT);
+
+  myServo1.attach(SERVO_PIN1, SERVO_OUT_LOW, SERVO_OUT_HIGH);
+  myServo2.attach(SERVO_PIN2, SERVO_OUT_LOW, SERVO_OUT_HIGH);
+  myServo3.attach(SERVO_PIN3, SERVO_OUT_LOW, SERVO_OUT_HIGH);
+  myServo4.attach(SERVO_PIN4, SERVO_OUT_LOW, SERVO_OUT_HIGH);
+
+  myServo1.write(DEFAULT_SERVO);
+  myServo2.write(DEFAULT_SERVO);
+  myServo3.write(DEFAULT_SERVO);
+  myServo4.write(DEFAULT_SERVO);
 
 #endif // ENABLE_SERVOS
 
