@@ -8,7 +8,7 @@ float ServoSub::servo4_angle = 0.0;
 
 void ServoSub::setup(rcl_node_t* node, rclc_executor_t* executor) {
   RCCHECK(rclc_subscription_init_best_effort(
-    &subscription,  // ✅ from base class (Subscriber)
+    &subscription, 
     node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
     "/servo/command"
@@ -16,7 +16,7 @@ void ServoSub::setup(rcl_node_t* node, rclc_executor_t* executor) {
 
   RCCHECK(rclc_executor_add_subscription(
     executor,
-    &subscription,  // ✅ from base class (Subscriber)
+    &subscription, 
     &msg,
     &ServoSub::callback,
     ON_NEW_DATA
