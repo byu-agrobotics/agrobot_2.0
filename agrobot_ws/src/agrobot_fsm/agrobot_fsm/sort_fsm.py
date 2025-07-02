@@ -255,8 +255,6 @@ class SortFSM(Node):
         Function to run the state machine
         """
         print("in run_sort_sm")
-        # self.state = State.INIT
-        self.state = State.SORT_EGG
 
         self.get_logger().info("Transitioned to state: " + str(self.state))
         match self.state:
@@ -272,6 +270,8 @@ class SortFSM(Node):
                 self.handle_reset()
             case _:
                 raise Exception("Invalid state: " + str(self.state))
+            
+        self.state = State.SORT_EGG
 
 
     def handle_init(self):
