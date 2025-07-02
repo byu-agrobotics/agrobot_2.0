@@ -124,12 +124,12 @@ class SortFSM(Node):
         self.servo_msg = ServoCommand()
         self.flip_timer = None
 
-        # TODO: Make a launch that ensure the IdentifyEgg script is going in agrobot_perception
-        # Set up clients
-        self.egg_id_client = self.create_client(IdentifyEgg, 'egg/identify')
-        # Wait for the service to be available
-        while not self.egg_id_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('Waiting for egg identification service...')
+        # # TODO: Make a launch that ensure the IdentifyEgg script is going in agrobot_perception
+        # # Set up clients
+        # self.egg_id_client = self.create_client(IdentifyEgg, 'egg/identify')
+        # # Wait for the service to be available
+        # while not self.egg_id_client.wait_for_service(timeout_sec=1.0):
+        #     self.get_logger().info('Waiting for egg identification service...')
 
         #####################################
         ### END ROS2 OBJECT DECLARATIONS ###
