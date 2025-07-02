@@ -128,7 +128,7 @@ class SortFSM(Node):
         # Create a timer to call `state_loop` every 0.1 seconds (10 Hz)
         self.state = State.SORT_EGG
 
-        self.create_timer(0.1, self.run_sort_sm)
+        self.create_timer(5, self.run_sort_sm)
 
         # # TODO: Make a launch that ensure the IdentifyEgg script is going in agrobot_perception
         # # Set up clients
