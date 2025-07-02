@@ -1,3 +1,13 @@
+void setup() {
+    // Your initialization code here
+}
+
+void loop() {
+    // Your repeated execution code here
+}
+
+
+
 // /**
 //  * @file main.cpp
 //  * @author Nelson Durrant
