@@ -27,6 +27,7 @@ setup(
             'handle_fsm = agrobot_fsm.handle_fsm:main',
             'navigate_fsm = agrobot_fsm.navigate_fsm:main',
             'sort_fsm = agrobot_fsm.sort_fsm:main',
+            'test_collect_fsm = agrobot_fsm.test_collect_fsm:main',
         ],
     },
 )
