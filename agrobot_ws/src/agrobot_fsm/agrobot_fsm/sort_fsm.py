@@ -329,7 +329,7 @@ class SortFSM(Node):
         """
         Function to move the egg into the bin
         """
-        self.FlipEgg(self) 
+        self.FlipEgg() 
 
         self.state = State.RESET
         
