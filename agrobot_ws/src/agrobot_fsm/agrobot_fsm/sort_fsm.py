@@ -124,6 +124,10 @@ class SortFSM(Node):
         self.servo_msg = ServoCommand()
         self.flip_timer = None
 
+        print("Setting up")
+        # Create a timer to call `state_loop` every 0.1 seconds (10 Hz)
+        self.create_timer(0.1, self.run_sort_sm)
+
         # # TODO: Make a launch that ensure the IdentifyEgg script is going in agrobot_perception
         # # Set up clients
         # self.egg_id_client = self.create_client(IdentifyEgg, 'egg/identify')
@@ -250,7 +254,7 @@ class SortFSM(Node):
         """
         Function to run the state machine
         """
-        
+        print("in run_sort_sm")
         # self.state = State.INIT
         self.state = State.SORT_EGG
 
