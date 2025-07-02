@@ -331,7 +331,7 @@ class SortFSM(Node):
         """
         self.FlipEgg() 
 
-        self.state = State.RESET
+        # self.state = State.RESET
         
 
     def handle_reset(self):
