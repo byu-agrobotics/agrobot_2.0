@@ -251,7 +251,8 @@ class SortFSM(Node):
         Function to run the state machine
         """
         
-        self.state = State.INIT
+        # self.state = State.INIT
+        self.state = State.SORT_EGG
 
         self.get_logger().info("Transitioned to state: " + str(self.state))
         match self.state:
@@ -278,40 +279,42 @@ class SortFSM(Node):
         self.task_info("Sorting task started")
         # TODO: Start conveyor belt
         
-        egg_type = self.identify_egg()
-        if egg_type == 0:
-            # this means it is empty, and egg needs to be loaded into the camera area
-            # TODO: ned to make it such that if the egg isn't detected properly, but the area is there that it returns
-            # something before another egg gets kicked into the box
-            pass
-        else:
-            self.state = State.READ_EGG
+        # egg_type = self.identify_egg()
+        # if egg_type == 0:
+        #     # this means it is empty, and egg needs to be loaded into the camera area
+        #     # TODO: ned to make it such that if the egg isn't detected properly, but the area is there that it returns
+        #     # something before another egg gets kicked into the box
+        #     pass
+        # else:
+        #     self.state = State.READ_EGG
+
+        self.state = State.RED_EGG
 
     def handle_read_egg(self):
         """
         Function to handle reading the egg using the camera        
         """
-        egg_type = self.identify_egg()
-        self.moving_egg = egg_type
-        self.LED_alert(egg_type)
+        # egg_type = self.identify_egg()
+        # self.moving_egg = egg_type
+        # self.LED_alert(egg_type)
         self.state = State.MOVE_EGG
 
     def handle_move_egg(self):
         """
         Function to move the egg to the right bin position
         """
-        if self.moving_egg == 1:
-            # move linear actuator to position 1
-            pass
-        elif self.moving_egg == 2:
-            # move linear actuator to position 2
-            pass
-        elif self.moving_egg == 3:
-            # move linear actuator to position 3
-            pass
-        else:
-            # assume the egg is bad, sort to position 3
-            pass
+        # if self.moving_egg == 1:
+        #     # move linear actuator to position 1
+        #     pass
+        # elif self.moving_egg == 2:
+        #     # move linear actuator to position 2
+        #     pass
+        # elif self.moving_egg == 3:
+        #     # move linear actuator to position 3
+        #     pass
+        # else:
+        #     # assume the egg is bad, sort to position 3
+        #     pass
 
         # TODO: ensure that the linear actuator got to the right position, either through timers or something else?
         self.state = State.SORT_EGG
@@ -320,7 +323,8 @@ class SortFSM(Node):
         """
         Function to move the egg into the bin
         """
-        self.flipEgg(self.moving_egg) 
+        self.FlipEgg(self.moving_egg) 
+
         self.state = State.RESET
         
 
@@ -329,21 +333,23 @@ class SortFSM(Node):
         Function to reset the linear actuator and kick in a new egg
         """
 
-        # TODO: Reset the linear actuator, probably will need to include a limit switch to ensure it is homed
+        print("Completed flip")
+
+        # # TODO: Reset the linear actuator, probably will need to include a limit switch to ensure it is homed
         
-        # start spinning the motor to put an egg in 
-        rotation = 0
-        egg_type = self.identify_egg()
+        # # start spinning the motor to put an egg in 
+        # rotation = 0
+        # egg_type = self.identify_egg()
 
-        while egg_type == 0:
-            self.get_logger().info(f"No egg detected. Rotation attempt {rotation}. Retrying in 1s...")
-            time.sleep(1)  #  Wait 1 second
-            rotation += 1
-            egg_type = self.identify_egg()  # Call service again
-            # TODO: add it such that if it isn't empty, don't icnreae rotation, it doesn't have to be fully detected yet
+        # while egg_type == 0:
+        #     self.get_logger().info(f"No egg detected. Rotation attempt {rotation}. Retrying in 1s...")
+        #     time.sleep(1)  #  Wait 1 second
+        #     rotation += 1
+        #     egg_type = self.identify_egg()  # Call service again
+        #     # TODO: add it such that if it isn't empty, don't icnreae rotation, it doesn't have to be fully detected yet
 
-        self.get_logger().info(f"Egg detected: type {egg_type}. Proceeding to next state.")
-        self.state = State.READ_EGG()
+        # self.get_logger().info(f"Egg detected: type {egg_type}. Proceeding to next state.")
+        # self.state = State.READ_EGG()
         
 
     #########################
