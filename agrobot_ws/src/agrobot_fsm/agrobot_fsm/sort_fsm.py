@@ -200,31 +200,31 @@ class SortFSM(Node):
         self.flip_timer.cancel()
         self.flip_timer = None
 
-    def identify_egg(self):
-        request = IdentifyEgg.Request()
+    # def identify_egg(self):
+    #     request = IdentifyEgg.Request()
 
-        # Send the request asynchronously
-        future = self.egg_id_client.call_async(request)
+    #     # Send the request asynchronously
+    #     future = self.egg_id_client.call_async(request)
 
-        # Optional: spin until the service completes
-        rclpy.spin_until_future_complete(self, future)
+    #     # Optional: spin until the service completes
+    #     rclpy.spin_until_future_complete(self, future)
 
-        if future.result() is not None:
-            egg_type = future.result().egg_type
-            if egg_type == 0:
-                self.get_logger().info("Received result: No egg detected")
-            elif egg_type == 1:
-                self.get_logger().info("Received result: Small Egg")
-            elif egg_type == 2:
-                self.get_logger().info("Received result: Large Egg")
-            elif egg_type == 3:
-                self.get_logger().info("Received result: Bad Egg")
-            else:
-                self.get_logger().warn(f"Unknown egg_type: {egg_type}")
-            return egg_type
-        else:
-            self.get_logger().error('Service call failed')
-            return None
+    #     if future.result() is not None:
+    #         egg_type = future.result().egg_type
+    #         if egg_type == 0:
+    #             self.get_logger().info("Received result: No egg detected")
+    #         elif egg_type == 1:
+    #             self.get_logger().info("Received result: Small Egg")
+    #         elif egg_type == 2:
+    #             self.get_logger().info("Received result: Large Egg")
+    #         elif egg_type == 3:
+    #             self.get_logger().info("Received result: Bad Egg")
+    #         else:
+    #             self.get_logger().warn(f"Unknown egg_type: {egg_type}")
+    #         return egg_type
+    #     else:
+    #         self.get_logger().error('Service call failed')
+    #         return None
 
     ###########################################
     ### END HELPER FUNCTIONS ###
