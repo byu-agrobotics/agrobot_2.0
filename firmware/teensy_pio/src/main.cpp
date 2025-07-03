@@ -328,7 +328,7 @@ void loop() {
 
     //   DBG_PRINT("[STATE] Spinning executor...");
       rcl_ret_t exec_ret = rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
-      DBG_PRINTF("[STATE] rclc_executor_spin_some returned: %d", exec_ret);
+    //   DBG_PRINTF("[STATE] rclc_executor_spin_some returned: %d", exec_ret);
     }
     break;
 
