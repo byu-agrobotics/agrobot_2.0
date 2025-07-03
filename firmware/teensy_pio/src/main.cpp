@@ -156,14 +156,14 @@ void error_loop() {
 
 // // ... Your includes and defines remain the same ...
 
-// // Add a helper macro for debug prints if enabled
-// #ifdef ENABLE_BT_DEBUG
-//   #define DBG_PRINT(msg) BTSerial.println(msg)
-//   #define DBG_PRINTF(fmt, ...) BTSerial.printf(fmt "\n", ##__VA_ARGS__)
-// #else
-//   #define DBG_PRINT(msg)
-//   #define DBG_PRINTF(fmt, ...)
-// #endif
+// Add a helper macro for debug prints if enabled
+#ifdef ENABLE_BT_DEBUG
+  #define DBG_PRINT(msg) BTSerial.println(msg)
+  #define DBG_PRINTF(fmt, ...) BTSerial.printf(fmt "\n", ##__VA_ARGS__)
+#else
+  #define DBG_PRINT(msg)
+  #define DBG_PRINTF(fmt, ...)
+#endif
 
 // // ... other globals ...
 
