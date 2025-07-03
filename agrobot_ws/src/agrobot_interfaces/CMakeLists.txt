@@ -30,13 +30,17 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/GenericTask.action"
+  "action/DriveControl.action"
+  "action/DriveStraight.action"
+  "action/Turn.action"
   "srv/IdentifyEgg.srv"
   "srv/Servo.srv"
   "msg/BatteryStatus.msg"
   "msg/DriveCommand.msg"
   "msg/LEDCommand.msg"
   "msg/ToFData.msg"
+  "msg/ServoCommand.msg"
   DEPENDENCIES std_msgs
-)
+) 
 
 ament_package()

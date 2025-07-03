@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'roboclaw_wrapper = agrobot_navigation.roboclaw_wrapper:main',
+            'drive_controller = agrobot_navigation.drive_controller:main',
         ],
     },
 )

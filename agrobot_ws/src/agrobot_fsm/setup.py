@@ -23,7 +23,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-        'servo_controller = agrobot_fsm.Servo_test_script:main'
+            'collect_fsm = agrobot_fsm.collect_fsm:main',
+            'sort_fsm = agrobot_fsm.sort_fsm:main',
+            # TODO: Add more FSMs
         ],
     },
 )

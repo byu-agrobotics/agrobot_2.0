@@ -1,0 +1,5 @@
+# .micro_ros.config.yml
+
+build:
+  packages:
+    - extra_packages/agrobot_interfaces

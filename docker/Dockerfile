@@ -140,8 +140,12 @@ RUN apt update && apt install -y \
 USER $NAME
 
 # NOTE: For some reason, this is broken as of Jun 2025
+# NOTE: For some reason, this is broken as of Jun 2025
 # Install plotjuggler - Nelson Durrant, Feb 2025
 # Useful for plotting and visualizing data from ROS 2 bags and real-time tests
+# USER root
+# RUN apt update && apt install -y ros-humble-plotjuggler-ros
+# USER $NAME
 # USER root
 # RUN apt update && apt install -y ros-humble-plotjuggler-ros
 # USER $NAME
@@ -184,3 +188,11 @@ USER root
 RUN apt update && apt install -y libusb-1.0-0 libudev-dev && apt clean && rm -rf /var/lib/apt/lists/*
 
 USER agrobot-docker
+
+# Needed to run tycmd 
+USER root
+RUN apt update && apt install -y libusb-1.0-0 libudev-dev && apt clean && rm -rf /var/lib/apt/lists/*
+
+USER agrobot-docker
+
+RUN pip3 install simple-pid
