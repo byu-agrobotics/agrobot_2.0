@@ -177,6 +177,7 @@ void servo_sub_callback(const void *servo_msgin) {
   myServo1.write(servo_msg->servo1);
   myServo2.write(servo_msg->servo2);
   myServo3.write(servo_msg->servo3);
+  myServo4.write(servo_msg->servo4);
 #endif
 
   DBG_PRINTF("[CALLBACK] Received servo commands: %d %d %d %d",
