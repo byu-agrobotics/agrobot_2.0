@@ -24,6 +24,8 @@
 #include "DFRobot_TMF8x01.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
+#include "agrobot_interfaces/msg/servo_command.h"
+
 
 // #include <frost_interfaces/msg/u_command.h>
 
