@@ -214,12 +214,14 @@ bool create_entities() {
   battery_pub.setup(node);
   tof_pub.setup(node);
 
-  rc = rclc_subscription_init_default(
-      &servo_sub,
-      &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
-      "/servo");
-  DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
+    DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
+    rc = rclc_subscription_init_default(
+        &servo_sub,
+        &node,
+        ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
+        "/servo");
+    DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
+
   RCCHECK(rc);
 
   rc = rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL, &allocator);
