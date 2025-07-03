@@ -211,8 +211,8 @@ bool create_entities() {
     DBG_PRINT("[CREATE_ENTITIES] Timestamps synchronized with agent");
   }
 
-  battery_pub.setup(node);
-  tof_pub.setup(node);
+//   battery_pub.setup(node);
+//   tof_pub.setup(node);
 
     DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
     rc = rclc_subscription_init_default(
