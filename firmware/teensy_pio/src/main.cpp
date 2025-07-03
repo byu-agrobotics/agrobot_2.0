@@ -219,7 +219,7 @@ bool create_entities() {
     &servo_sub,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
-    "/servos"));
+    "/servo"));
 
 
        // create executor
