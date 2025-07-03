@@ -266,7 +266,22 @@ void setup() {
   BTSerial.println("Hello from Teensy!");
 #endif
 
-  // Your existing setup code ...
+#ifdef ENABLE_SERVOS
+  pinMode(SERVO_PIN1, OUTPUT);
+  pinMode(SERVO_PIN2, OUTPUT);
+  pinMode(SERVO_PIN3, OUTPUT);
+
+  myServo1.attach(SERVO_PIN1, SERVO_OUT_LOW, SERVO_OUT_HIGH);
+  myServo2.attach(SERVO_PIN2, SERVO_OUT_LOW, SERVO_OUT_HIGH);
+  myServo3.attach(SERVO_PIN3, SERVO_OUT_LOW, SERVO_OUT_HIGH);
+  myServo4.attach(SERVO_PIN4, SERVO_OUT_LOW, SERVO_OUT_HIGH);
+
+  myServo1.write(DEFAULT_SERVO);
+  myServo2.write(DEFAULT_SERVO);
+  myServo3.write(DEFAULT_SERVO);
+  myServo4.write(DEFAULT_SERVO);
+
+#endif // ENABLE_SERVOS
 
   state = WAITING_AGENT;
   DBG_PRINT("[SETUP] Initial state: WAITING_AGENT");
