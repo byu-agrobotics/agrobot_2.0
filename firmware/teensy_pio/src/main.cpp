@@ -215,10 +215,12 @@ bool create_entities() {
   tof_pub.setup(node);
 
     // create subscribers
-  RCCHECK(rclc_subscription_init_default(
-      &servo_sub, &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
-      NAMESPACE "/servos"));
+    RCCHECK(rclc_subscription_init_default(
+    &servo_sub,
+    &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
+    "/servos"));
+
 
        // create executor
   RCSOFTCHECK(rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL,
