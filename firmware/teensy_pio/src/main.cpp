@@ -595,7 +595,7 @@ void loop() {
 //       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());  //How to run if this has higher baud rate? Also what MS time?
 // #endif // ENABLE_LED_MATRIX
 
-      // rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
+    rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 
       //////////////////////////////////////////////////////////
     }
