@@ -356,6 +356,7 @@ void error_loop() {
  * @param servo_msgin The received agrobot_interfaces/msg/ServoCommand message
  */
 void servo_sub_callback(const void *servo_msgin) {
+  DBG_PRINT("[CALLBACK] servo_sub_callback triggered");
 
   last_received = millis();
 
