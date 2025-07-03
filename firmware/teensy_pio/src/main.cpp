@@ -226,10 +226,18 @@ bool create_entities() {
   RCSOFTCHECK(rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL,
                                  &allocator));
 
-  // add callbacks to executor
-  RCSOFTCHECK(
-      rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
-                                     &servo_sub_callback, ON_NEW_DATA));
+//   // add callbacks to executor
+//   RCSOFTCHECK(
+//       rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
+//                                      &servo_sub_callback, ON_NEW_DATA));
+
+    rcl_ret_t ret = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
+                                                &servo_sub_callback, ON_NEW_DATA);
+    if (ret != RCL_RET_OK) {
+    BTSerial.print("[ERROR] Failed to add servo subscription: ");
+    BTSerial.println(ret);
+    }
+
 
 #ifdef ENABLE_BT_DEBUG
   BTSerial.println("[INFO] Micro-ROS entities created successfully");
