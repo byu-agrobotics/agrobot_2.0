@@ -147,12 +147,13 @@ enum states {
 } static state;
 
 void error_loop() {
+  
   while (1) {
-    delay(10000000);
-
-#ifdef ENABLE_BT_DEBUG
+    #ifdef ENABLE_BT_DEBUG
     BTSerial.println("[ERROR] In error loop");
-#endif // ENABLE_BT_DEBUG
+    #endif // ENABLE_BT_DEBUG
+    delay(10000);
+
   }
 }
 
