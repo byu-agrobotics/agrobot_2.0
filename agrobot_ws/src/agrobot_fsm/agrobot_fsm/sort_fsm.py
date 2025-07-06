@@ -131,7 +131,7 @@ class SortFSM(Node):
 
         print("Setting up")
         # Create a timer to call `state_loop` every 0.1 seconds (10 Hz)
-        self.state = State.READ_EGG
+        self.state = State.MOVE_EGG
 
         self.create_timer(5, self.run_sort_sm)
 
@@ -324,6 +324,7 @@ class SortFSM(Node):
         """
         Function to move the egg to the right bin position
         """
+        # feed the egg into the carriage
         feeder_msg = Bool()
         feeder_msg.data = True
         self.feeder_pub.publish(feeder_msg)
