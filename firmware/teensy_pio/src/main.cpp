@@ -224,28 +224,28 @@ void LED_sub_callback(const void *LED_msgin) {
 }
 
 bool create_entities() {
-  DBG_PRINT("[CREATE_ENTITIES] Starting micro-ROS entities creation");
+  // DBG_PRINT("[CREATE_ENTITIES] Starting micro-ROS entities creation");
 
   allocator = rcl_get_default_allocator();
   rcl_ret_t rc;
 
   // Debug statements 
   rc = rclc_support_init(&support, 0, NULL, &allocator);
-  DBG_PRINTF("[CREATE_ENTITIES] rclc_support_init returned: %d", rc);
+  // DBG_PRINTF("[CREATE_ENTITIES] rclc_support_init returned: %d", rc);
   RCCHECK(rc);
 
   rc = rclc_node_init_default(&node, "micro_ros_platformio_node", "", &support);
-  DBG_PRINTF("[CREATE_ENTITIES] rclc_node_init_default returned: %d", rc);
+  // DBG_PRINTF("[CREATE_ENTITIES] rclc_node_init_default returned: %d", rc);
   RCCHECK(rc);
 
-  DBG_PRINT("[CREATE_ENTITIES] Synchronizing timestamps with agent");
+  // DBG_PRINT("[CREATE_ENTITIES] Synchronizing timestamps with agent");
   rc = rmw_uros_sync_session(SYNC_TIMEOUT);
-  DBG_PRINTF("[CREATE_ENTITIES] rmw_uros_sync_session returned: %d", rc);
+  // DBG_PRINTF("[CREATE_ENTITIES] rmw_uros_sync_session returned: %d", rc);
 
   if (!rmw_uros_epoch_synchronized()) {
-    DBG_PRINT("[CREATE_ENTITIES][ERROR] Timestamp sync failed!");
+    // DBG_PRINT("[CREATE_ENTITIES][ERROR] Timestamp sync failed!");
   } else {
-    DBG_PRINT("[CREATE_ENTITIES] Timestamps synchronized with agent");
+    // DBG_PRINT("[CREATE_ENTITIES] Timestamps synchronized with agent");
   }
 
 //   battery_pub.setup(node);
@@ -287,7 +287,7 @@ bool create_entities() {
     return false;
   }
 
-  
+
 
 }
 
