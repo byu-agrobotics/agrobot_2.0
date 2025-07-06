@@ -25,7 +25,8 @@
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include "agrobot_interfaces/msg/servo_command.h"
-#include "std_msgs/msg/bool.hpp"
+#include "agrobot_interfaces/msg/led_command.h"
+// #include "std_msgs/msg/bool.hpp"
 
 
 
@@ -100,7 +101,7 @@ rclc_executor_t executor;
 
 // message objects
 agrobot_interfaces__msg__ServoCommand servo_msg;
-std_msgs__msg__Bool LED_msg;
+agrobot_interfaces__msg__LEDCommand LED_msg;
 
 // subscriber objects
 rcl_subscription_t servo_sub;
@@ -193,18 +194,29 @@ void LED_sub_callback(const void *LED_msgin) {
 
   last_received = millis();
 
-  const std_msgs__msg__Bool *LED_msg =
-      (const std_msgs__msg__Bool *)LED_msgin;
+  const agrobot_interfaces__msg__LEDCommand *LED_msg =
+      (const agrobot_interfaces__msg__LEDCommand *)LED_msgin;
 
 #ifdef ENABLE_LED
-  if (LED_msg->data) {
+  if (LED_msg->command == 1) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->data);
-    myServo4.write(0)
-  } else {
+             LED_msg->command);
+    myServo4.write(0);    
+  } 
+  else if (LED_msg->command == 2) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->data);
-    myServo4.write(180)
+             LED_msg->command);
+    myServo4.write(90);
+  }
+  else if (LED_msg->command == 3) {
+    DBG_PRINTF("[CALLBACK] Received LED command: %d",
+             LED_msg->command);
+    myServo4.write(180);
+  }
+  else {
+    DBG_PRINTF("[CALLBACK] Received LED command: %d",
+             LED_msg->command);
+    myServo4.write(45);
   }
 #endif
 
@@ -252,7 +264,7 @@ bool create_entities() {
     rc = rclc_subscription_init_default(
         &LED_sub,
         &node,
-        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+        ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
         "/LED");
     DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
 
