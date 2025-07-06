@@ -252,42 +252,43 @@ bool create_entities() {
 //   tof_pub.setup(node);
 
 
-    // // subscriber setup
-    // DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
-    // rc = rclc_subscription_init_default(
-    //     &servo_sub,
-    //     &node,
-    //     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
-    //     "/servo");
-    // DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
+  // subscriber setup
+  rcl_ret_t rc1 = rclc_subscription_init_default(
+    &servo_sub, &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
+    "/servo");
+  DBG_PRINTF("Servo init returned: %d", rc1);
 
-    DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
-    rc = rclc_subscription_init_default(
-        &LED_sub,
-        &node,
-        ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
-        "/LED");
-    DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
+  rcl_ret_t rc2 = rclc_subscription_init_default(
+    &LED_sub, &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
+    "/LED");
+  DBG_PRINTF("LED init returned: %d", rc2);
 
-  RCCHECK(rc);
+  if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK) {
+    DBG_PRINT("[ERROR] One of the subscriptions failed – entering error loop");
+    return false;
+  }
+
+  // RCCHECK(rc);
 
   rc = rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL, &allocator);
 //   DBG_PRINTF("[CREATE_ENTITIES] rclc_executor_init returned: %d", rc);
   RCSOFTCHECK(rc);
 
-  // rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
-  //                                    &servo_sub_callback, ON_NEW_DATA);
-  rc = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
-                                      &LED_sub_callback, ON_NEW_DATA);
+  rcl_ret_t a1 = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg, &servo_sub_callback, ON_NEW_DATA);
+  DBG_PRINTF("Add servo sub returned: %d", a1);
 
-  if (rc != RCL_RET_OK) {
-    DBG_PRINTF("[CREATE_ENTITIES][ERROR] Failed to add subscription: %d", rc);
-  } else {
-    DBG_PRINT("[CREATE_ENTITIES] Subscription added successfully");
+  rcl_ret_t a2 = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg, &LED_sub_callback, ON_NEW_DATA);
+  DBG_PRINTF("Add LED sub returned: %d", a2);
+
+  if (a1 != RCL_RET_OK || a2 != RCL_RET_OK) {
+    DBG_PRINT("[ERROR] Failed to add one of the subscriptions to executor");
+    return false;
   }
 
-  DBG_PRINT("[CREATE_ENTITIES] micro-ROS entities created successfully");
-  return true;
+  
+
 }
 
 void destroy_entities() {
