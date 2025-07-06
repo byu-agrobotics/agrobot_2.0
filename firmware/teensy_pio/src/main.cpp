@@ -357,9 +357,9 @@ void loop() {
     // DBG_PRINT("[STATE] WAITING_AGENT: Pinging agent...");
     EXECUTE_EVERY_N_MS(500, {
       int ping_res = rmw_uros_ping_agent(100, 1);
-      DBG_PRINTF("[STATE] rmw_uros_ping_agent returned: %d", ping_res);
+      // DBG_PRINTF("[STATE] rmw_uros_ping_agent returned: %d", ping_res);
       state = (ping_res == RMW_RET_OK) ? AGENT_AVAILABLE : WAITING_AGENT;
-      DBG_PRINTF("[STATE] Transitioning to state: %d", state);
+      // DBG_PRINTF("[STATE] Transitioning to state: %d", state);
     });
     break;
 
