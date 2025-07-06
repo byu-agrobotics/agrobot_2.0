@@ -34,7 +34,7 @@
 
 // #define ENABLE_ACTUATORS
 // #define ENABLE_TOF_SENSORS
-#define ENABLE_LEDS
+#define ENABLE_LED
 // #define ENABLE_BATTERY
 #define ENABLE_BT_DEBUG
 #define ENABLE_SERVOS
