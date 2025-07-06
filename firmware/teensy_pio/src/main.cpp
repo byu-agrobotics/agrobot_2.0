@@ -251,7 +251,8 @@ bool create_entities() {
 
 //   battery_pub.setup(node);
 //   tof_pub.setup(node);
-
+  struct mallinfo mi = mallinfo();
+  DBG_PRINTF("Free heap before subs: %d bytes", mi.fordblks);
 
   // subscriber setup
   rcl_ret_t rc1 = rclc_subscription_init_default(
@@ -259,6 +260,9 @@ bool create_entities() {
     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
     "/servo");
   DBG_PRINTF("Servo init returned: %d", rc1);
+
+  struct mallinfo mi = mallinfo();
+  DBG_PRINTF("Free heap after 1 sub: %d bytes", mi.fordblks);
 
   rcl_ret_t rc2 = rclc_subscription_init_default(
     &LED_sub, &node,
@@ -268,7 +272,7 @@ bool create_entities() {
 
 
   struct mallinfo mi = mallinfo();
-  DBG_PRINTF("Free heap: %d bytes", mi.fordblks);
+  DBG_PRINTF("Free heap after 2 subs: %d bytes", mi.fordblks);
 
 
   if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK) {
