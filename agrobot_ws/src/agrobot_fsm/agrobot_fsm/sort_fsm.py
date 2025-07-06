@@ -131,7 +131,7 @@ class SortFSM(Node):
 
         print("Setting up")
         # Create a timer to call `state_loop` every 0.1 seconds (10 Hz)
-        self.state = State.SORT_EGG
+        self.state = State.INIT
 
         self.create_timer(5, self.run_sort_sm)
 
