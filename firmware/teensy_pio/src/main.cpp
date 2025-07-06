@@ -272,6 +272,10 @@ bool create_entities() {
 
   rc = rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL, &allocator);
 //   DBG_PRINTF("[CREATE_ENTITIES] rclc_executor_init returned: %d", rc);
+  if (rc != RCL_RET_OK) {
+    DBG_PRINT("[CREATE_ENTITIES][ERROR] LED subscription failed");
+    return false;
+  }
   RCSOFTCHECK(rc);
 
   rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
