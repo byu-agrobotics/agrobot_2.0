@@ -294,8 +294,8 @@ class SortFSM(Node):
 
         # Start conveyor belt
         conveyor_msg = Bool()
-        conveyor_msg.ddata = True
-        self.conveyor_pub.publih(conveyor_msg)
+        conveyor_msg.data = True
+        self.conveyor_pub.publish(conveyor_msg)
 
 
         
