@@ -252,22 +252,22 @@ bool create_entities() {
 //   tof_pub.setup(node);
 
 
-    // // subscriber setup
-    // DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
-    // rc = rclc_subscription_init_default(
-    //     &servo_sub,
-    //     &node,
-    //     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
-    //     "/servo");
-    // DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
-
+    // subscriber setup
     DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
     rc = rclc_subscription_init_default(
-        &LED_sub,
+        &servo_sub,
         &node,
-        ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
-        "/LED");
+        ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
+        "/servo");
     DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
+
+    // DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
+    // rc = rclc_subscription_init_default(
+    //     &LED_sub,
+    //     &node,
+    //     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
+    //     "/LED");
+    // DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
 
   RCCHECK(rc);
 
@@ -275,10 +275,10 @@ bool create_entities() {
 //   DBG_PRINTF("[CREATE_ENTITIES] rclc_executor_init returned: %d", rc);
   RCSOFTCHECK(rc);
 
-  // rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
-  //                                    &servo_sub_callback, ON_NEW_DATA);
-  rc = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
-                                      &LED_sub_callback, ON_NEW_DATA);
+  rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
+                                     &servo_sub_callback, ON_NEW_DATA);
+  // rc = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
+  //                                     &LED_sub_callback, ON_NEW_DATA);
 
   if (rc != RCL_RET_OK) {
     DBG_PRINTF("[CREATE_ENTITIES][ERROR] Failed to add subscription: %d", rc);
