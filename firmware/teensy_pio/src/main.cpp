@@ -261,7 +261,6 @@ bool create_entities() {
     "/servo");
   DBG_PRINTF("Servo init returned: %d", rc1);
 
-  struct mallinfo mi = mallinfo();
   DBG_PRINTF("Free heap after 1 sub: %d bytes", mi.fordblks);
 
   rcl_ret_t rc2 = rclc_subscription_init_default(
@@ -271,7 +270,6 @@ bool create_entities() {
   DBG_PRINTF("LED init returned: %d", rc2);
 
 
-  struct mallinfo mi = mallinfo();
   DBG_PRINTF("Free heap after 2 subs: %d bytes", mi.fordblks);
 
 
