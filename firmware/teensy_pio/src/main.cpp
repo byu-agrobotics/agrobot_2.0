@@ -275,8 +275,8 @@ bool create_entities() {
 //   DBG_PRINTF("[CREATE_ENTITIES] rclc_executor_init returned: %d", rc);
   RCSOFTCHECK(rc);
 
-  rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
-                                     &servo_sub_callback, ON_NEW_DATA);
+  // rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
+  //                                    &servo_sub_callback, ON_NEW_DATA);
   rc = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
                                       &LED_sub_callback, ON_NEW_DATA);
 
