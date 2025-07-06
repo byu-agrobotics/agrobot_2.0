@@ -26,6 +26,7 @@
 #include <Servo.h>
 #include "agrobot_interfaces/msg/servo_command.h"
 #include "agrobot_interfaces/msg/led_command.h"
+#include <Arduino.h>
 // #include "std_msgs/msg/bool.hpp"
 
 
@@ -264,6 +265,7 @@ bool create_entities() {
     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
     "/LED");
   DBG_PRINTF("LED init returned: %d", rc2);
+  DBG_PRINTF("Free heap: %d bytes", xPortGetFreeHeapSize());
 
   if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK) {
     DBG_PRINT("[ERROR] One of the subscriptions failed – entering error loop");
