@@ -123,7 +123,7 @@ class SortFSM(Node):
         self.servo_pub = self.create_publisher(ServoCommand, "/servo", 10)
         self.combine_pub = self.create_publisher(Bool, '/combine', 10)
         self.conveyor_pub = self.create_publisher(Bool, '/conveyor', 10)
-        self.feeder_pub = self.create_publiher(Bool, '/feeder', 10)
+        self.feeder_pub = self.create_publisher(Bool, '/feeder', 10)
         self.carriage_pub = self.create_publisher(Bool, '/carriage', 10)
 
         self.servo_msg = ServoCommand()
