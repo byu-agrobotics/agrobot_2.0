@@ -286,8 +286,7 @@ class SortFSM(Node):
         Function to handle the initialization state
         initializes the conveyor belt, turns on the camera
         """
-
-        self.task_info("Sorting task started")
+        self.get_logger().info("Starting conveyor belt and combine")
         # Start combine belt
         combine_msg = Bool()
         combine_msg.data = True
