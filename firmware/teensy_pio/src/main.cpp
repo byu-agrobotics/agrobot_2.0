@@ -27,6 +27,7 @@
 #include "agrobot_interfaces/msg/servo_command.h"
 #include "agrobot_interfaces/msg/led_command.h"
 #include <malloc.h>
+struct mallinfo mi = mallinfo();
 // #include "std_msgs/msg/bool.hpp"
 
 
@@ -251,7 +252,7 @@ bool create_entities() {
 
 //   battery_pub.setup(node);
 //   tof_pub.setup(node);
-  struct mallinfo mi = mallinfo();
+  mi = mallinfo();
   DBG_PRINTF("Free heap before subs: %d bytes", mi.fordblks);
 
   // subscriber setup
@@ -260,7 +261,7 @@ bool create_entities() {
     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
     "/servo");
   DBG_PRINTF("Servo init returned: %d", rc1);
-
+  mi = mallinfo();
   DBG_PRINTF("Free heap after 1 sub: %d bytes", mi.fordblks);
 
   rcl_ret_t rc2 = rclc_subscription_init_default(
@@ -269,7 +270,7 @@ bool create_entities() {
     "/LED");
   DBG_PRINTF("LED init returned: %d", rc2);
 
-
+  mi = mallinfo();
   DBG_PRINTF("Free heap after 2 subs: %d bytes", mi.fordblks);
 
 
