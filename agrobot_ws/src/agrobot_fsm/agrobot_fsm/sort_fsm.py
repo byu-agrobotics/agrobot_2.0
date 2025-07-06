@@ -29,6 +29,7 @@ from rclpy.node import Node
 # from sensor_msgs.msg import NavSatFix
 from agrobot_interfaces.msg import ServoCommand, LEDCommand
 from agrobot_interfaces.srv import IdentifyEgg
+from std_msgs.msg import Bool 
 # from std_srvs.srv import Trigger, SetBool
 # from threading import RLock
 # from typing import Any
@@ -117,9 +118,13 @@ class SortFSM(Node):
         #################################
         # Set up publishers
 
-        # LED pub
+        # publishers
         self.LED_pub = self.create_publisher(LEDCommand, "/LED", 10)
         self.servo_pub = self.create_publisher(ServoCommand, "/servo", 10)
+        self.combine_pub = self.create_publisher(Bool, '/combine', 10)
+        self.conveyor_pub = self.create_publisher(Bool, '/conveyor', 10)
+        self.feeder_pub = self.create_publiher(Bool, '/feeder', 10)
+        self.carriage_pub = self.create_publisher(Bool, '/carriage', 10)
 
         self.servo_msg = ServoCommand()
         self.flip_timer = None
@@ -283,7 +288,17 @@ class SortFSM(Node):
         """
 
         self.task_info("Sorting task started")
-        # TODO: Start conveyor belt
+        # Start combine belt
+        combine_msg = Bool()
+        combine_msg.data = True
+        self.combine_pub.publish(combine_msg)
+
+        # Start conveyor belt
+        conveyor_msg = Bool()
+        conveyor_msg.ddata = True
+        self.conveyor_pub.publih(conveyor_msg)
+
+
         
         # egg_type = self.identify_egg()
         # if egg_type == 0:
@@ -294,21 +309,33 @@ class SortFSM(Node):
         # else:
         #     self.state = State.READ_EGG
 
-        self.state = State.RED_EGG
+        # self.state = State.RED_EGG
 
     def handle_read_egg(self):
         """
         Function to handle reading the egg using the camera        
         """
+        egg_type = 1
         # egg_type = self.identify_egg()
         # self.moving_egg = egg_type
-        # self.LED_alert(egg_type)
-        self.state = State.MOVE_EGG
+        self.LED_alert(egg_type)
+        # self.state = State.MOVE_EGG
 
     def handle_move_egg(self):
         """
         Function to move the egg to the right bin position
         """
+        feeder_msg = Bool()
+        feeder_msg.data = True
+        self.feeder_pub.publish(feeder_msg)
+
+        # TODO: wait either on a timer OR wait on the hall effect sensor
+
+        # move the carriage
+        carriage_msg = Bool()
+        carriage_msg.data = True
+        self.carriage_pub.publish(carriage_msg)
+
         # if self.moving_egg == 1:
         #     # move linear actuator to position 1
         #     pass
@@ -323,7 +350,7 @@ class SortFSM(Node):
         #     pass
 
         # TODO: ensure that the linear actuator got to the right position, either through timers or something else?
-        self.state = State.SORT_EGG
+        # self.state = State.SORT_EGG
 
     def handle_sort_egg(self):
         """
