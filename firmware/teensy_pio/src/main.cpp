@@ -25,6 +25,8 @@
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include "agrobot_interfaces/msg/servo_command.h"
+#include "std_msgs/msg/bool.hpp"
+
 
 
 // #include <frost_interfaces/msg/u_command.h>
@@ -56,7 +58,7 @@
 
 // micro-ROS config values
 #define BAUD_RATE 6000000
-#define CALLBACK_TOTAL 1
+#define CALLBACK_TOTAL 2  // for the number of subs you have 
 #define SYNC_TIMEOUT 1000
 
 // hardware pin values
@@ -98,10 +100,11 @@ rclc_executor_t executor;
 
 // message objects
 agrobot_interfaces__msg__ServoCommand servo_msg;
+std_msgs__msg__Bool LED_msg;
 
 // subscriber objects
 rcl_subscription_t servo_sub;
-
+rcl_subscription_t LED_sub;
 
 // publisher objects
 BatteryPub battery_pub;
@@ -185,12 +188,35 @@ void servo_sub_callback(const void *servo_msgin) {
              servo_msg->servo4);
 }
 
+void LED_sub_callback(const void *LED_msgin) {
+  DBG_PRINT("[CALLBACK] LED_sub_callback triggered");
+
+  last_received = millis();
+
+  const std_msgs__msg__Bool *LED_msg =
+      (const std_msgs__msg__Bool *)LED_msgin;
+
+#ifdef ENABLE_LED
+  if (LED_msg->data) {
+    DBG_PRINTF("[CALLBACK] Received LED command: %d",
+             LED_msg->data);
+    myServo4.write(0)
+  } else {
+    DBG_PRINTF("[CALLBACK] Received LED command: %d",
+             LED_msg->data);
+    myServo4.write(180)
+  }
+#endif
+
+}
+
 bool create_entities() {
   DBG_PRINT("[CREATE_ENTITIES] Starting micro-ROS entities creation");
 
   allocator = rcl_get_default_allocator();
   rcl_ret_t rc;
 
+  // Debug statements 
   rc = rclc_support_init(&support, 0, NULL, &allocator);
   DBG_PRINTF("[CREATE_ENTITIES] rclc_support_init returned: %d", rc);
   RCCHECK(rc);
@@ -212,12 +238,22 @@ bool create_entities() {
 //   battery_pub.setup(node);
 //   tof_pub.setup(node);
 
+
+    // subscriber setup
     DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
     rc = rclc_subscription_init_default(
         &servo_sub,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
         "/servo");
+    DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
+
+    DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
+    rc = rclc_subscription_init_default(
+        &LED_sub,
+        &node,
+        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+        "/LED");
     DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
 
   RCCHECK(rc);
@@ -228,6 +264,9 @@ bool create_entities() {
 
   rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
                                      &servo_sub_callback, ON_NEW_DATA);
+  rc = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
+                                      &LED_sub_callback, ON_NEW_DATA);
+
   if (rc != RCL_RET_OK) {
     DBG_PRINTF("[CREATE_ENTITIES][ERROR] Failed to add subscription: %d", rc);
   } else {
