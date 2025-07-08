@@ -313,13 +313,13 @@ bool create_entities() {
 
   rcl_ret_t rc1, rc2, rc3;
 
-  // DBG_PRINT("[CREATE_ENTITIES] Before servo_sub");
-  rc1 = rclc_subscription_init_default(
-      &servo_sub,
-      &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
-      "/servo");
-  DBG_PRINTF("[CREATE_ENTITIES] servo_sub returned: %d", rc1);
+  // // DBG_PRINT("[CREATE_ENTITIES] Before servo_sub");
+  // rc1 = rclc_subscription_init_default(
+  //     &servo_sub,
+  //     &node,
+  //     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
+  //     "/servo");
+  // DBG_PRINTF("[CREATE_ENTITIES] servo_sub returned: %d", rc1);
 
   // DBG_PRINT("[CREATE_ENTITIES] Before led_sub");
   rc2 = rclc_subscription_init_default(
@@ -356,9 +356,9 @@ bool create_entities() {
   RCSOFTCHECK(rc);
 
 
-  rcl_ret_t a1 = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
-                                              &servo_sub_callback, ON_NEW_DATA);
-  DBG_PRINTF("[CREATE_ENTITIES] Added servo_sub to executor: %d", a1);
+  // rcl_ret_t a1 = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
+  //                                             &servo_sub_callback, ON_NEW_DATA);
+  // DBG_PRINTF("[CREATE_ENTITIES] Added servo_sub to executor: %d", a1);
 
 
   rcl_ret_t a2 = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
@@ -376,7 +376,7 @@ bool create_entities() {
 
 
 
-  if (a1 != RCL_RET_OK || a2 != RCL_RET_OK || a3 != RCL_RET_OK) {
+  if (a2 != RCL_RET_OK || a3 != RCL_RET_OK) {
     DBG_PRINT("[CREATE_ENTITIES][ERROR] Failed to add one or more subscriptions to executor");
     return false;
   }
