@@ -58,7 +58,7 @@
 
 // micro-ROS config values
 #define BAUD_RATE 6000000
-#define CALLBACK_TOTAL 1
+#define CALLBACK_TOTAL 2
 #define SYNC_TIMEOUT 1000
 
 // hardware pin values
@@ -266,21 +266,21 @@ bool create_entities() {
 //   battery_pub.setup(node);
 //   tof_pub.setup(node);
 
-    DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
+    DBG_PRINT("[CREATE_ENTITIES] Before servo_sub");
     rc = rclc_subscription_init_default(
         &servo_sub,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
         "/servo");
-    DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
+    DBG_PRINTF("[CREATE_ENTITIES] servo_sub returned: %d", rc);
 
-    // DBG_PRINT("[CREATE_ENTITIES] Before rclc_subscription_init_default");
-    // rc = rclc_subscription_init_default(
-    //     &LED_sub,
-    //     &node,
-    //     ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
-    //     "/LED");
-    // DBG_PRINTF("[CREATE_ENTITIES] rclc_subscription_init_default returned: %d", rc);
+    DBG_PRINT("[CREATE_ENTITIES] Before led_sub");
+    rc = rclc_subscription_init_default(
+        &LED_sub,
+        &node,
+        ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
+        "/LED");
+    DBG_PRINTF("[CREATE_ENTITIES] led_sub returned: %d", rc);
 
   RCCHECK(rc);
 
@@ -291,8 +291,8 @@ bool create_entities() {
   rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
                                      &servo_sub_callback, ON_NEW_DATA);
 
-  // rc = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
-  //                                     &LED_sub_callback, ON_NEW_DATA);
+  rc = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
+                                      &LED_sub_callback, ON_NEW_DATA);
 
 
   if (rc != RCL_RET_OK) {
@@ -377,9 +377,9 @@ void loop() {
     // DBG_PRINT("[STATE] WAITING_AGENT: Pinging agent...");
     EXECUTE_EVERY_N_MS(500, {
       int ping_res = rmw_uros_ping_agent(100, 1);
-      DBG_PRINTF("[STATE] rmw_uros_ping_agent returned: %d", ping_res);
+      // DBG_PRINTF("[STATE] rmw_uros_ping_agent returned: %d", ping_res);
       state = (ping_res == RMW_RET_OK) ? AGENT_AVAILABLE : WAITING_AGENT;
-      DBG_PRINTF("[STATE] Transitioning to state: %d", state);
+      // DBG_PRINTF("[STATE] Transitioning to state: %d", state);
     });
     break;
 
