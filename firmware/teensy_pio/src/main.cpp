@@ -252,17 +252,19 @@ bool create_entities() {
 
 //   battery_pub.setup(node);
 //   tof_pub.setup(node);
-  mi = mallinfo();
-  DBG_PRINTF("Free heap before subs: %d bytes", mi.fordblks);
+
+
+  // mi = mallinfo();
+  // DBG_PRINTF("Free heap before subs: %d bytes", mi.fordblks);
 
   // subscriber setup
-  rcl_ret_t rc1 = rclc_subscription_init_default(
-    &servo_sub, &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
-    "/servo");
-  DBG_PRINTF("Servo init returned: %d", rc1);
-  mi = mallinfo();
-  DBG_PRINTF("Free heap after 1 sub: %d bytes", mi.fordblks);
+  // rcl_ret_t rc1 = rclc_subscription_init_default(
+  //   &servo_sub, &node,
+  //   ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
+  //   "/servo");
+  // DBG_PRINTF("Servo init returned: %d", rc1);
+  // mi = mallinfo();
+  // DBG_PRINTF("Free heap after 1 sub: %d bytes", mi.fordblks);
 
   rcl_ret_t rc2 = rclc_subscription_init_default(
     &LED_sub, &node,
@@ -270,14 +272,14 @@ bool create_entities() {
     "/LED");
   DBG_PRINTF("LED init returned: %d", rc2);
 
-  mi = mallinfo();
-  DBG_PRINTF("Free heap after 2 subs: %d bytes", mi.fordblks);
+  // mi = mallinfo();
+  // DBG_PRINTF("Free heap after 2 subs: %d bytes", mi.fordblks);
 
 
-  if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK) {
-    DBG_PRINT("[ERROR] One of the subscriptions failed – entering error loop");
-    return false;
-  }
+  // if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK) {
+  //   DBG_PRINT("[ERROR] One of the subscriptions failed – entering error loop");
+  //   return false;
+  // }
 
   // RCCHECK(rc);
 
@@ -285,16 +287,16 @@ bool create_entities() {
 //   DBG_PRINTF("[CREATE_ENTITIES] rclc_executor_init returned: %d", rc);
   RCSOFTCHECK(rc);
 
-  rcl_ret_t a1 = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg, &servo_sub_callback, ON_NEW_DATA);
-  DBG_PRINTF("Add servo sub returned: %d", a1);
+  // rcl_ret_t a1 = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg, &servo_sub_callback, ON_NEW_DATA);
+  // DBG_PRINTF("Add servo sub returned: %d", a1);
 
   rcl_ret_t a2 = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg, &LED_sub_callback, ON_NEW_DATA);
   DBG_PRINTF("Add LED sub returned: %d", a2);
 
-  if (a1 != RCL_RET_OK || a2 != RCL_RET_OK) {
-    DBG_PRINT("[ERROR] Failed to add one of the subscriptions to executor");
-    return false;
-  }
+  // if (a1 != RCL_RET_OK || a2 != RCL_RET_OK) {
+  //   DBG_PRINT("[ERROR] Failed to add one of the subscriptions to executor");
+  //   return false;
+  // }
 
 
 
