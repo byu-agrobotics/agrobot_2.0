@@ -112,7 +112,7 @@ agrobot_interfaces__msg__LEDCommand LED_msg;
 std_msgs__msg__Bool combine_msg;
 
 // subscriber objects
-rcl_publisher_t combine_pub;
+rcl_publisher_t combine_sub;
 rcl_subscription_t servo_sub;
 rcl_subscription_t LED_sub;
 
