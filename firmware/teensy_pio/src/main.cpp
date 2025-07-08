@@ -343,10 +343,10 @@ bool create_entities() {
       "/LED1");
   DBG_PRINTF("[CREATE_ENTITIES] combine_sub returned: %d", rc3);
 
-  if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK || rc3 != RCL_RET_OK) {
-    DBG_PRINT("[CREATE_ENTITIES][ERROR] One or more subscriptions failed to initialize");
-    return false;
-  }
+  // if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK || rc3 != RCL_RET_OK) {
+  //   DBG_PRINT("[CREATE_ENTITIES][ERROR] One or more subscriptions failed to initialize");
+  //   return false;
+  // }
   if (rc3 != RCL_RET_OK) {
       DBG_PRINTF("[CREATE_ENTITIES][ERROR] LED_sub1 init failed: %s", rcl_get_error_string().str);
       rcl_reset_error();
