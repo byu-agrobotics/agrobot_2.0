@@ -73,7 +73,7 @@
 #define SERVO_PIN4 23
 #define LED_PIN 22
 #define NUM_LEDS 64
-#define BRIGHTNESS  64
+#define BRIGHTNESS  32
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 
