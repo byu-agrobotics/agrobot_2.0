@@ -67,7 +67,7 @@
 #define BT_MC_TX 35
 #define VOLT_PIN 18
 #define CURRENT_PIN 17
-#define LED_PIN 13 // Built-in Teensy LED
+// #define LED_PIN 13 // Built-in Teensy LED
 #define SERVO_PIN1 2
 #define SERVO_PIN2 3
 #define SERVO_PIN3 4
@@ -109,12 +109,14 @@ rclc_executor_t executor;
 // message objects
 agrobot_interfaces__msg__ServoCommand servo_msg;
 agrobot_interfaces__msg__LEDCommand LED_msg;
+agrobot_interfaces__msg__LEDCommand LED_msg1;
 std_msgs__msg__Bool combine_msg;
 
 // subscriber objects
 rcl_subscription_t combine_sub;
 rcl_subscription_t servo_sub;
 rcl_subscription_t LED_sub;
+rcl_subscription_t LED_sub1;
 
 // publisher objects
 BatteryPub battery_pub;
@@ -199,7 +201,17 @@ void servo_sub_callback(const void *servo_msgin) {
 }
 
 
+void LED_sub_callback1(const void *LED_msgin) {
+  DBG_PRINT("[CALLBACK] LED_sub_callback triggered");
+  CRGB color;
+  last_received = millis();
 
+  const agrobot_interfaces__msg__LEDCommand *LED_msg =
+      (const agrobot_interfaces__msg__LEDCommand *)LED_msgin;
+
+  DBG_PRINT("In sub3 callback");
+
+}
 
 
 void LED_sub_callback(const void *LED_msgin) {
@@ -317,11 +329,18 @@ bool create_entities() {
       "/LED");
   DBG_PRINTF("[CREATE_ENTITIES] led_sub returned: %d", rc2);
 
+  // rc3 = rclc_subscription_init_default(
+  //     &combine_sub,
+  //     &node,
+  //     ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+  //     "/combine");
+  // DBG_PRINTF("[CREATE_ENTITIES] combine_sub returned: %d", rc3);
+
   rc3 = rclc_subscription_init_default(
-      &combine_sub,
+      &LED_sub1,
       &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-      "/combine");
+      ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
+      "/LED1");
   DBG_PRINTF("[CREATE_ENTITIES] combine_sub returned: %d", rc3);
 
   if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK || rc3 != RCL_RET_OK) {
@@ -343,8 +362,12 @@ bool create_entities() {
   DBG_PRINTF("[CREATE_ENTITIES] Added LED_sub to executor: %d", a2);
 
 
-  rcl_ret_t a3 = rclc_executor_add_subscription(&executor, &combine_sub, &combine_msg,
-                                              &combine_sub_callback, ON_NEW_DATA);
+  // rcl_ret_t a3 = rclc_executor_add_subscription(&executor, &combine_sub, &combine_msg,
+  //                                             &combine_sub_callback, ON_NEW_DATA);
+  // DBG_PRINTF("[CREATE_ENTITIES] Added combine_sub to executor: %d", a3);
+
+  rcl_ret_t a3 = rclc_executor_add_subscription(&executor, &LED_sub1, &LED_msg1,
+                                              &LED_sub_callback1, ON_NEW_DATA);
   DBG_PRINTF("[CREATE_ENTITIES] Added combine_sub to executor: %d", a3);
 
 
