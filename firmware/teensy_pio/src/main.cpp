@@ -346,14 +346,14 @@ void loop() {
     digitalWrite(LED_PIN, HIGH);
   }
 
-  if (millis() - last_received > 5000) {
+  if (millis() - last_received > 50000) {
     DBG_PRINT("[LOOP] No command received in last 5 seconds - fail safe activated");
     // TODO: actuator stop code here
   }
 
   switch (state) {
   case WAITING_AGENT:
-    DBG_PRINT("[STATE] WAITING_AGENT: Pinging agent...");
+    // DBG_PRINT("[STATE] WAITING_AGENT: Pinging agent...");
     EXECUTE_EVERY_N_MS(500, {
       int ping_res = rmw_uros_ping_agent(100, 1);
       DBG_PRINTF("[STATE] rmw_uros_ping_agent returned: %d", ping_res);
