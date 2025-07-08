@@ -24,9 +24,10 @@
 #include "DFRobot_TMF8x01.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
+#include <FastLED.h>
 #include "agrobot_interfaces/msg/servo_command.h"
 #include "agrobot_interfaces/msg/led_command.h"
-#include <FastLED.h>
+#include "std_msgs/msg/bool.h"
 
 
 // #include <frost_interfaces/msg/u_command.h>
@@ -58,7 +59,7 @@
 
 // micro-ROS config values
 #define BAUD_RATE 6000000
-#define CALLBACK_TOTAL 2
+#define CALLBACK_TOTAL 3
 #define SYNC_TIMEOUT 1000
 
 // hardware pin values
@@ -108,8 +109,10 @@ rclc_executor_t executor;
 // message objects
 agrobot_interfaces__msg__ServoCommand servo_msg;
 agrobot_interfaces__msg__LEDCommand LED_msg;
+std_msgs__msg__Bool combine_msg;
 
 // subscriber objects
+rcl_publisher_t combine_pub;
 rcl_subscription_t servo_sub;
 rcl_subscription_t LED_sub;
 
@@ -234,6 +237,32 @@ void LED_sub_callback(const void *LED_msgin) {
   FastLED.show();
   delay(100);  // update rate
 #endif
+}
+
+
+
+void combine_sub_callback(const void *combine_msgin) {
+  DBG_PRINT("[CALLBACK] combine_sub_callback triggered");
+  CRGB color;
+  last_received = millis();
+
+  const std_msgs__msg__Bool *combine_msg =
+      (const std_msgs__msg__Bool *)combine_msgin;
+
+  if (combine_msg->data) {
+    DBG_PRINTF("[CALLBACK] Received combine command: %d",
+             combine_msg->data);
+    color = CRGB::Green;
+  } 
+  else{
+    DBG_PRINTF("[CALLBACK] Received combine command: %d",
+             combine_msg->data);
+    color = CRGB::Blue;
+  }
+
+  fill_solid(leds, NUM_LEDS, color);
+  FastLED.show();
+  delay(100);  // update rate
 
 }
 
@@ -267,9 +296,12 @@ bool create_entities() {
 //   tof_pub.setup(node);
 
 
-  rcl_ret_t rc1, rc2;
 
-  DBG_PRINT("[CREATE_ENTITIES] Before servo_sub");
+  // setting up subscribers 
+
+  rcl_ret_t rc1, rc2, rc3;
+
+  // DBG_PRINT("[CREATE_ENTITIES] Before servo_sub");
   rc1 = rclc_subscription_init_default(
       &servo_sub,
       &node,
@@ -277,7 +309,7 @@ bool create_entities() {
       "/servo");
   DBG_PRINTF("[CREATE_ENTITIES] servo_sub returned: %d", rc1);
 
-  DBG_PRINT("[CREATE_ENTITIES] Before led_sub");
+  // DBG_PRINT("[CREATE_ENTITIES] Before led_sub");
   rc2 = rclc_subscription_init_default(
       &LED_sub,
       &node,
@@ -285,7 +317,14 @@ bool create_entities() {
       "/LED");
   DBG_PRINTF("[CREATE_ENTITIES] led_sub returned: %d", rc2);
 
-  if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK) {
+  rc3 = rclc_subscription_init_default(
+      &combine_sub,
+      &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+      "/combine");
+  DBG_PRINTF("[CREATE_ENTITIES] combine_sub returned: %d", rc3);
+
+  if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK || rc3 != RCL_RET_OK) {
     DBG_PRINT("[CREATE_ENTITIES][ERROR] One or more subscriptions failed to initialize");
     return false;
   }
@@ -293,15 +332,24 @@ bool create_entities() {
   rc = rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL, &allocator);
   RCSOFTCHECK(rc);
 
+
   rcl_ret_t a1 = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
                                               &servo_sub_callback, ON_NEW_DATA);
   DBG_PRINTF("[CREATE_ENTITIES] Added servo_sub to executor: %d", a1);
+
 
   rcl_ret_t a2 = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
                                               &LED_sub_callback, ON_NEW_DATA);
   DBG_PRINTF("[CREATE_ENTITIES] Added LED_sub to executor: %d", a2);
 
-  if (a1 != RCL_RET_OK || a2 != RCL_RET_OK) {
+
+  rcl_ret_t a3 = rclc_executor_add_subscription(&executor, &combine_sub, &combine_msg,
+                                              &combine_sub_callback, ON_NEW_DATA);
+  DBG_PRINTF("[CREATE_ENTITIES] Added combine_sub to executor: %d", a3);
+
+
+
+  if (a1 != RCL_RET_OK || a2 != RCL_RET_OK || a3 != RCL_RET_OK) {
     DBG_PRINT("[CREATE_ENTITIES][ERROR] Failed to add one or more subscriptions to executor");
     return false;
   }
