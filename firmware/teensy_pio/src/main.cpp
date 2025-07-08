@@ -216,7 +216,7 @@ void LED_sub_callback(const void *LED_msgin) {
   else if (LED_msg->command == 2) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
              LED_msg->command);
-    olor = CRGB::Blue;
+    color = CRGB::Blue;
   }
   else if (LED_msg->command == 3) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
@@ -352,7 +352,7 @@ void setup() {
 #endif // ENABLE_SERVOS
 
   // add LEDs
-  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+  FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
   FastLED.setBrightness(BRIGHTNESS);
 
   state = WAITING_AGENT;
