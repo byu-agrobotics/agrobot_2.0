@@ -347,6 +347,10 @@ bool create_entities() {
     DBG_PRINT("[CREATE_ENTITIES][ERROR] One or more subscriptions failed to initialize");
     return false;
   }
+  if (rc3 != RCL_RET_OK) {
+      DBG_PRINTF("[CREATE_ENTITIES][ERROR] LED_sub1 init failed: %s", rcl_get_error_string().str);
+      rcl_reset_error();
+    }
 
   rc = rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL, &allocator);
   RCSOFTCHECK(rc);
