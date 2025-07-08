@@ -423,7 +423,7 @@ void loop() {
   }
 
   if (millis() - last_received > 50000) {
-    lastPrecieved = millis()
+    last_recieved = millis()
     DBG_PRINT("[LOOP] No command received in last 5 seconds - fail safe activated");
     // TODO: actuator stop code here
   }
