@@ -26,6 +26,7 @@
 #include <Servo.h>
 #include "agrobot_interfaces/msg/servo_command.h"
 #include "agrobot_interfaces/msg/led_command.h"
+#include <FastLED.h>
 
 
 // #include <frost_interfaces/msg/u_command.h>
@@ -66,10 +67,17 @@
 #define VOLT_PIN 18
 #define CURRENT_PIN 17
 #define LED_PIN 13 // Built-in Teensy LED
-#define SERVO_PIN1 20
-#define SERVO_PIN2 21
-#define SERVO_PIN3 22
+#define SERVO_PIN1 2
+#define SERVO_PIN2 3
+#define SERVO_PIN3 4
 #define SERVO_PIN4 23
+#define LED_PIN 22
+#define NUM_LEDS 64
+#define BRIGHTNESS  64
+#define LED_TYPE    WS2812B
+#define COLOR_ORDER GRB
+
+CRGB leds[NUM_LEDS];
 
 // default servo positions
 #define DEFAULT_SERVO 90
@@ -187,9 +195,13 @@ void servo_sub_callback(const void *servo_msgin) {
              servo_msg->servo4);
 }
 
+
+
+
+
 void LED_sub_callback(const void *LED_msgin) {
   DBG_PRINT("[CALLBACK] LED_sub_callback triggered");
-
+  CRGB color;
   last_received = millis();
 
   const agrobot_interfaces__msg__LEDCommand *LED_msg =
@@ -199,23 +211,28 @@ void LED_sub_callback(const void *LED_msgin) {
   if (LED_msg->command == 1) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
              LED_msg->command);
-    myServo4.write(0);    
+    color = CRGB::Green;
   } 
   else if (LED_msg->command == 2) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
              LED_msg->command);
-    myServo4.write(90);
+    olor = CRGB::Blue;
   }
   else if (LED_msg->command == 3) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
              LED_msg->command);
-    myServo4.write(180);
+    color = CRGB::Red;
   }
   else {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
              LED_msg->command);
-    myServo4.write(45);
+    color = CRGB::Black;
   }
+
+
+  fill_solid(leds, NUM_LEDS, color);
+  FastLED.show();
+  delay(100);  // update rate
 #endif
 
 }
@@ -333,6 +350,10 @@ void setup() {
   myServo4.write(DEFAULT_SERVO);
 
 #endif // ENABLE_SERVOS
+
+  // add LEDs
+  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+  FastLED.setBrightness(BRIGHTNESS);
 
   state = WAITING_AGENT;
   DBG_PRINT("[SETUP] Initial state: WAITING_AGENT");
