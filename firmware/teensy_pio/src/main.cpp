@@ -266,40 +266,95 @@ bool create_entities() {
 //   battery_pub.setup(node);
 //   tof_pub.setup(node);
 
-    DBG_PRINT("[CREATE_ENTITIES] Before servo_sub");
-    rc = rclc_subscription_init_default(
-        &servo_sub,
-        &node,
-        ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
-        "/servo");
-    DBG_PRINTF("[CREATE_ENTITIES] servo_sub returned: %d", rc);
 
-    DBG_PRINT("[CREATE_ENTITIES] Before led_sub");
-    rc = rclc_subscription_init_default(
-        &LED_sub,
-        &node,
-        ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
-        "/LED");
-    DBG_PRINTF("[CREATE_ENTITIES] led_sub returned: %d", rc);
+  rcl_ret_t rc1, rc2;
 
-  RCCHECK(rc);
+  DBG_PRINT("[CREATE_ENTITIES] Before servo_sub");
+  rc1 = rclc_subscription_init_default(
+      &servo_sub,
+      &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
+      "/servo");
+  DBG_PRINTF("[CREATE_ENTITIES] servo_sub returned: %d", rc1);
+
+  DBG_PRINT("[CREATE_ENTITIES] Before led_sub");
+  rc2 = rclc_subscription_init_default(
+      &LED_sub,
+      &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
+      "/LED");
+  DBG_PRINTF("[CREATE_ENTITIES] led_sub returned: %d", rc2);
+
+  if (rc1 != RCL_RET_OK || rc2 != RCL_RET_OK) {
+    DBG_PRINT("[CREATE_ENTITIES][ERROR] One or more subscriptions failed to initialize");
+    return false;
+  }
 
   rc = rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL, &allocator);
-//   DBG_PRINTF("[CREATE_ENTITIES] rclc_executor_init returned: %d", rc);
   RCSOFTCHECK(rc);
 
-  rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
-                                     &servo_sub_callback, ON_NEW_DATA);
+  rcl_ret_t a1 = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
+                                              &servo_sub_callback, ON_NEW_DATA);
+  DBG_PRINTF("[CREATE_ENTITIES] Added servo_sub to executor: %d", a1);
 
-  rc = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
-                                      &LED_sub_callback, ON_NEW_DATA);
+  rcl_ret_t a2 = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
+                                              &LED_sub_callback, ON_NEW_DATA);
+  DBG_PRINTF("[CREATE_ENTITIES] Added LED_sub to executor: %d", a2);
 
-
-  if (rc != RCL_RET_OK) {
-    DBG_PRINTF("[CREATE_ENTITIES][ERROR] Failed to add subscription: %d", rc);
-  } else {
-    DBG_PRINT("[CREATE_ENTITIES] Subscription added successfully");
+  if (a1 != RCL_RET_OK || a2 != RCL_RET_OK) {
+    DBG_PRINT("[CREATE_ENTITIES][ERROR] Failed to add one or more subscriptions to executor");
+    return false;
   }
+
+  DBG_PRINT("[CREATE_ENTITIES] micro-ROS entities created successfully");
+  return true;
+
+
+
+
+//     DBG_PRINT("[CREATE_ENTITIES] Before servo_sub");
+//     rc = rclc_subscription_init_default(
+//         &servo_sub,
+//         &node,
+//         ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, ServoCommand),
+//         "/servo");
+//     DBG_PRINTF("[CREATE_ENTITIES] servo_sub returned: %d", rc);
+
+//     DBG_PRINT("[CREATE_ENTITIES] Before led_sub");
+//     rc = rclc_subscription_init_default(
+//         &LED_sub,
+//         &node,
+//         ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
+//         "/LED");
+//     DBG_PRINTF("[CREATE_ENTITIES] led_sub returned: %d", rc);
+
+//   RCCHECK(rc);
+
+//   rc = rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL, &allocator);
+// //   DBG_PRINTF("[CREATE_ENTITIES] rclc_executor_init returned: %d", rc);
+//   RCSOFTCHECK(rc);
+
+//   rc = rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg,
+//                                      &servo_sub_callback, ON_NEW_DATA);
+
+//   rc = rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg,
+//                                       &LED_sub_callback, ON_NEW_DATA);
+
+
+//   if (rc != RCL_RET_OK) {
+//     DBG_PRINTF("[CREATE_ENTITIES][ERROR] Failed to add subscription: %d", rc);
+//   } else {
+//     DBG_PRINT("[CREATE_ENTITIES] Subscription added successfully");
+//   }
+
+
+
+
+
+
+
+
+
 
   DBG_PRINT("[CREATE_ENTITIES] micro-ROS entities created successfully");
   return true;
