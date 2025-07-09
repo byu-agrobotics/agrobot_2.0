@@ -205,7 +205,6 @@ void blink_led(int count, int duration_ms) {
 
 #ifdef ENABLE_SERVOS
 void servo_sub_callback(const void *servo_msgin) {
-  DBG_PRINT("[CALLBACK] servo_sub_callback triggered");
 
   last_received = millis();
 
