@@ -25,7 +25,7 @@ class EggID(Node):
         self.egg_id_service = self.create_service(
             IdentifyEgg, "egg/identify", self.egg_id_callback
         )
-        self.egg_camera = cv2.VideoCapture(8)
+        self.egg_camera = cv2.VideoCapture(0)
 
         # Tune the exposure and white balance values here to get the colors to be what they need to be
         os.system(
