@@ -34,8 +34,8 @@
 
 #define ENABLE_ACTUATORS
 #define ENABLE_TOF_SENSORS
-#define ENABLE_LEDS
-// #define ENABLE_BATTERY
+#define ENABLE_LED
+#define ENABLE_BATTERY
 #define ENABLE_BT_DEBUG
 
 #define ENABLE_HBRIDGE
@@ -44,8 +44,8 @@
 // #define ENABLE_LED_MATRIX
 
 #define ENABLE_STEPPER_1
-#define pinIRd 8 // IR sensor pin
-// TOF enable pins
+#define EABLE_LED
+
 #define EN1       2                   // EN pin for left TMF8801
 #define EN2       3                   // EN pin for right TMF8801
 #define EN3       4                   // EN pin for front TMF8801
@@ -98,8 +98,17 @@
 #define CALLBACK_TOTAL 7 // Increased for H-bridge
 #define SYNC_TIMEOUT 1000
 
-
-
+// hardware pin values
+#define BT_MC_RX 34
+#define BT_MC_TX 35
+#define VOLT_PIN 18
+#define CURRENT_PIN 17
+#define LED_PIN 13 // Built-in Teensy LED
+#define RBG_PIN 22
+#define NUM_LEDS 64
+#define BRIGHTNESS  32
+#define LED_TYPE    WS2812B
+#define COLOR_ORDER GRB
 
 // sensor baud rates
 #define BT_DEBUG_RATE 9600
@@ -111,6 +120,9 @@
 
 // time of last received command (used as a fail safe)
 unsigned long last_received = 0;
+
+// initialize LEDs
+CRGB leds[NUM_LEDS];
 
 // TOF Calibration data
 uint8_t caliDataBuf[14] = {0x41,0x57,0x01,0xFD,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x04};
@@ -135,9 +147,10 @@ std_msgs__msg__Bool egg_msg;
   volatile float motor_position = 0.0; // In revolutions
 #endif
 
-#ifdef ENABLE_HBRIDGE
-  rcl_subscription_t hbridge_subscriber;
-  std_msgs__msg__Bool hbridge_msg;
+#ifdef ENABLE_LED
+  rcl_subscription_t LED_sub;
+  std_msgs__msg__Float32 LED_msg;
+
 #endif
 
 // publisher objects
@@ -175,8 +188,8 @@ enum states {
   void stepper_callback(const void *msgin);
 #endif
 
-#ifdef ENABLE_HBRIDGE
-  void hbridge_callback(const void *msgin);
+#ifdef ENABLE_LED
+
 #endif
 
 // Helper function to blink the LED a specific number of times
@@ -188,6 +201,45 @@ void blink_led(int count, int duration_ms) {
     delay(duration_ms);
   }
 }
+
+#ifdef ENABLE_LED
+void LED_sub_callback(const void *LED_msgin) {
+  DBG_PRINT("[CALLBACK] LED_sub_callback triggered");
+  CRGB color;
+  last_received = millis();
+
+  const agrobot_interfaces__msg__LEDCommand *LED_msg =
+      (const agrobot_interfaces__msg__LEDCommand *)LED_msgin;
+  if (LED_msg->command == 1) {
+    DBG_PRINTF("[CALLBACK] Received LED command: %d",
+             LED_msg->command);
+    color = CRGB::Green;
+  } 
+  else if (LED_msg->command == 2) {
+    DBG_PRINTF("[CALLBACK] Received LED command: %d",
+             LED_msg->command);
+    color = CRGB::Blue;
+  }
+  else if (LED_msg->command == 3) {
+    DBG_PRINTF("[CALLBACK] Received LED command: %d",
+             LED_msg->command);
+    color = CRGB::Red;
+  }
+  else {
+    DBG_PRINTF("[CALLBACK] Received LED command: %d",
+             LED_msg->command);
+    color = CRGB::Black;
+  }
+
+
+  fill_solid(leds, NUM_LEDS, color);
+  FastLED.show();
+  delay(100);  // update rate
+}
+#endif
+
+
+
 
 void error_loop() {
   while (1) {
@@ -228,6 +280,8 @@ bool create_entities() {
   }
 #endif // ENABLE_BT_DEBUG
 
+
+
   // Initialize the executor
   RCCHECK(rclc_executor_init(&executor, &support.context, CALLBACK_TOTAL, &allocator));
 
@@ -265,17 +319,16 @@ bool create_entities() {
   RCCHECK(rclc_executor_add_subscription(&executor, &stepper_subscriber, &twist_msg, &stepper_callback, ON_NEW_DATA));
 #endif
 
-#ifdef ENABLE_HBRIDGE
-  // Initialize H-bridge subscriber
-  RCCHECK(rclc_subscription_init_default(
-    &hbridge_subscriber,
-    &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-    "/hbridge_motor_one_command"));
+#ifdef ENABLE_LED
+     RCCHEK(rclc_subscription_init_default(
+      &LED_sub,
+      &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
+      "/LED"));
 
   // Add subscriber to the executor
-  RCCHECK(rclc_executor_add_subscription(&executor, &hbridge_subscriber, &hbridge_msg, &hbridge_callback, ON_NEW_DATA));
-#endif
+  RCCHECK(rclc_executor_add_subscription(&executor, &LED_sub, &LED_msg, &LED_sub_callback, ON_NEW_DATA));
+#endif // ENABLE_LED
 
 #ifdef ENABLE_BT_DEBUG
   BTSerial.println("[INFO] Micro-ROS entities created successfully");
