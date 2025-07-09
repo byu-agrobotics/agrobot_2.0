@@ -87,28 +87,11 @@ class NavigateFSM(Node):
             ReentrantCallbackGroup()
         )  # needed to monitor cancel requests
 
-        # TOF subscriber
-        self.tof_subscriber = self.create_subscription(
-            ToFData,
-            "tof/data",
-            self.tof_callback,
-            10,
-            callback_group=norm_callback_group,
-        )
-        self.tof_subscriber  # prevent unused variable warning
-
         # Action client to center robot
         self.center_client = PatchRclpyIssue1123(
             self, 
             DriveControl, 
             "control/center", 
-            callback_group=nested_action_callback_group,
-        )
-
-        self.drive_straight_client = PatchRclpyIssue1123(
-            self,
-            DriveStraight,
-            "control/drive_straight",
             callback_group=nested_action_callback_group,
         )
 
@@ -129,7 +112,6 @@ class NavigateFSM(Node):
         self.goal_handle = None
         self.result_future = None
         self.feedback = None
-        self.last_tof_data = None
         self.drivecontrol_result = None
 
         #####################################
