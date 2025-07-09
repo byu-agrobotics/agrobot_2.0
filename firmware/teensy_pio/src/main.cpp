@@ -95,7 +95,7 @@
 
 // micro-ROS config values
 #define BAUD_RATE 6000000
-#define CALLBACK_TOTAL 7 // Increased for H-bridge
+#define CALLBACK_TOTAL 2
 #define SYNC_TIMEOUT 1000
 
 // hardware pin values
