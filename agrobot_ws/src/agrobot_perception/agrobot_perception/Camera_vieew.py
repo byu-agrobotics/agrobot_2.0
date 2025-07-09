@@ -1,7 +1,7 @@
 import cv2
 import os
 
-CAMERA_INDEX = 8  # Change to your camera device index
+CAMERA_INDEX = 0  # Change to your camera device index
 
 # Apply camera settings - update controls after checking your camera
 os.system(
