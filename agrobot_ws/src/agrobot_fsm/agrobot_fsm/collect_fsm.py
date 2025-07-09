@@ -133,7 +133,8 @@ class CollectFSM(Node):
         self.goal_handle = None
         self.result_future = None
         self.feedback = None
-
+        self.last_tof_data = None
+        
         #####################################
         ### END ROS 2 OBJECT DECLARATIONS ###
         #####################################
@@ -279,7 +280,12 @@ class CollectFSM(Node):
         Callback function for the TOF subscriber
         """
 
-        # TODO: Add here
+        self.last_tof_data = msg
+        right = msg.right
+        left = msg.left
+        front = msg.front
+        back = msg.back
+        self.get_logger().info(f"I heard: Front={front}, Left={left}, Right={right}, Back={back}")
 
     ###################################
     ### END GENERAL ROS 2 CALLBACKS ###

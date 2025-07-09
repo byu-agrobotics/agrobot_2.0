@@ -67,7 +67,7 @@ class NavigateFSM(Node):
         - egg/identify (agrobot_interfaces/IdentifyEgg) [norm_callback_group]
     Action Clients:
         - control/drive_straight (agrobot_interfaces/DriveStraight) [nested_action_callback_group]
-    - TODO: Add more action clients
+        - control/center (agrobot_interfaces/DriveControl) [nested_action_callback_group]
     Action Servers:
         - control/center (agrobot_interfaces/action/DriveControl)
     """
@@ -87,14 +87,10 @@ class NavigateFSM(Node):
             ReentrantCallbackGroup()
         )  # needed to monitor cancel requests
 
-        self.last_tof_data = None
-        self.feedback = None
-        self.drivecontrol_result = None
-
         # TOF subscriber
         self.tof_subscriber = self.create_subscription(
             ToFData,
-            "tof/data", # TODO: Check this topic name
+            "tof/data",
             self.tof_callback,
             10,
             callback_group=norm_callback_group,
@@ -133,6 +129,8 @@ class NavigateFSM(Node):
         self.goal_handle = None
         self.result_future = None
         self.feedback = None
+        self.last_tof_data = None
+        self.drivecontrol_result = None
 
         #####################################
         ### END ROS 2 OBJECT DECLARATIONS ###

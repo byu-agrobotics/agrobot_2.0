@@ -7,7 +7,7 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallb
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.task import Future
-from agrobot_interfaces.action import GenericTask, DriveStraight
+from agrobot_interfaces.action import GenericTask, DriveStraight, DriveControl
 from agrobot_interfaces.srv import IdentifyEgg
 from agrobot_interfaces.msg import ToFData
 from threading import RLock
@@ -16,10 +16,7 @@ from typing import Any
 
 class State(Enum):
     INIT = auto()
-    RED = auto()
-    GREEN = auto()
-    BLUE = auto()
-
+    CENTER_ROBOT = auto()
 
 class PatchRclpyIssue1123(ActionClient):
     """
@@ -52,9 +49,9 @@ class PatchRclpyIssue1123(ActionClient):
             return super()._get_result_async(*args, **kwargs)
 
 
-class CollectFSM(Node):
+class SortFSM(Node):
     """
-    Class for executing the collecting task
+    Class for executing the navigating task
 
     Note: Modified from the BYU Mars Rover Team state machine. (See that for more documentation.)
 
@@ -62,22 +59,22 @@ class CollectFSM(Node):
     :date: Jun 2025
     
     Publishers:
-    - ADD HERE
+        - drive/command (agrobot_interfaces/msg/DriveCommand)
     Subscribers:
-    - tof/data (sensor_msgs/Range) [norm_callback_group] (TODO: Check this topic name)
-        -> mostly just left as an example right now, might not need this in specific
+        - tof/data (sensor_msgs/Range) [norm_callback_group] (TODO: Check this topic name)
+            -> mostly just left as an example right now, might not need this in specific
     Clients:
-    - egg/identify (agrobot_interfaces/IdentifyEgg) [norm_callback_group]
+        - egg/identify (agrobot_interfaces/IdentifyEgg) [norm_callback_group]
     Action Clients:
-    - control/drive_straight (agrobot_interfaces/DriveStraight) [nested_action_callback_group]
+        - control/drive_straight (agrobot_interfaces/DriveStraight) [nested_action_callback_group]
     - TODO: Add more action clients
     Action Servers:
-    - exec_collect_fsm (agrobot_interfaces/GenericTask) [action_callback_group]
+        - control/center (agrobot_interfaces/action/DriveControl)
     """
 
     def __init__(self):
 
-        super().__init__("collect_fsm")
+        super().__init__("sort_fsm")
 
         #################################
         ### ROS 2 OBJECT DECLARATIONS ###
@@ -100,49 +97,74 @@ class CollectFSM(Node):
         )
         self.tof_subscriber  # prevent unused variable warning
 
-        # Client to identify eggs
-        self.egg_id_client = self.create_client(
-            IdentifyEgg,
-            "egg/identify",
-            callback_group=norm_callback_group,
+        # Action client to center robot
+        self.center_client = PatchRclpyIssue1123(
+            self, 
+            DriveControl, 
+            "control/center", 
+            callback_group=nested_action_callback_group,
         )
-        while not self.egg_id_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info(
-                "Egg identification service not available, waiting again..."
-            )
-        self.egg_id_request = IdentifyEgg.Request()
 
-        # Action client to drive straight
         self.drive_straight_client = PatchRclpyIssue1123(
-            self, DriveStraight, "control/drive_straight", callback_group=nested_action_callback_group,
+            self,
+            DriveStraight,
+            "control/drive_straight",
+            callback_group=nested_action_callback_group,
         )
 
         # Action server to run the task executor
         self.action_server = ActionServer(
             self,
             GenericTask,
-            "exec_collect_fsm",
+            "exec_sort_fsm",
             self.action_server_callback,
             callback_group=action_callback_group,
             cancel_callback=self.cancel_callback,
         )
 
+
         # Initialize variables
-        self.name = "collect_fsm"
+        self.name = "sort_fsm"
         self.task_goal_handle = None
         self.goal_handle = None
         self.result_future = None
         self.feedback = None
+        self.last_tof_data = None
+        self.drivecontrol_result = None
 
         #####################################
         ### END ROS 2 OBJECT DECLARATIONS ###
         #####################################
 
-        self.get_logger().info("Collect FSM node initialized")
+        self.get_logger().info("Sort FSM node initialized")
 
     ###################################
     ### NESTED ACTION HANDLING CODE ###
     ###################################
+
+    async def send_drive_to_center_goal(self):
+        """
+        NOTE: Call this with the asyncio.run() function
+        """
+        self.get_logger().debug("Waiting for 'DriveControl' action server")
+        while not self.center_client.wait_for_server(timeout_sec=1.0):
+            self.get_logger.info("'DriveControl' action server not available, waiting...")
+        goal_msg = DriveControl.Goal()
+        send_goal_future = self.center_client.send_goal_async(
+            goal_msg, self._feedbackCallback
+        )
+        await send_goal_future  # fix for iron/humble threading bug
+        self.goal_handle = send_goal_future.result()
+        if not self.goal_handle.accepted:
+            self.get_logger().error("DriveControl request was rejected!")
+            return False
+        self.result_future = self.goal_handle.get_result_async()
+        await self.result_future
+
+        self.drivecontrol_result = self.result_future.result().result
+        self.get_logger().info(f"DriveControl result received: success = {self.drivecontrol_result.success}")
+
+        return True
 
     async def drive_straight(self, front_distance):
         """
@@ -176,7 +198,7 @@ class CollectFSM(Node):
         NOTE: Call this with the asyncio.run() function
         """
 
-        self.self.get_logger().info("Canceling current task.")
+        self.get_logger().info("Canceling current task.")
         if self.result_future:
             future = self.goal_handle.cancel_goal_async()
             await future  # fix for iron/humble threading bug
@@ -214,8 +236,10 @@ class CollectFSM(Node):
         await self.result_future
 
     def _feedbackCallback(self, msg):
-        self.get_logger().debug("Received action feedback message")
         self.feedback = msg.feedback
+        self.get_logger().debug(f"DriveControl Feedback — forward_error={self.feedback.forward_error}, "
+        f"lateral_error={self.feedback.lateral_error}, stability={self.feedback.stability_count}"
+        )
         return
 
     #######################################
@@ -256,11 +280,11 @@ class CollectFSM(Node):
 
         try:
             self.run_state_machine()
-            result.msg = "Eggggg-cellent"
+            result.msg = "We have our heading!"
             self.task_goal_handle.succeed()
         except Exception as e:
             self.task_fatal(str(e))
-            result.msg = "** furious chicken noises **"
+            result.msg = "**sad jack sparrow noises** (nav is not working)"
             self.task_goal_handle.abort()
 
         self.task_goal_handle = None
@@ -278,8 +302,13 @@ class CollectFSM(Node):
         """
         Callback function for the TOF subscriber
         """
+        self.last_tof_data = msg
+        right = msg.right
+        left = msg.left
+        front = msg.front
+        back = msg.back
+        self.get_logger().info(f"I heard: Front={front}, Left={left}, Right={right}, Back={back}")
 
-        # TODO: Add here
 
     ###################################
     ### END GENERAL ROS 2 CALLBACKS ###
@@ -334,9 +363,9 @@ class CollectFSM(Node):
         Function to write success back to the GenericTask action client
         """
 
-        self.get_logger().info("[" + self.self.name + "] " + string)
+        self.get_logger().info("[" + self.name + "] " + string)
         task_feedback = GenericTask.Feedback()
-        task_feedback.status = "[SUCCESS] [" + self.self.name + "] " + string
+        task_feedback.status = "[SUCCESS] [" + self.name + "] " + string
         self.task_goal_handle.publish_feedback(task_feedback)
 
     ###################################
@@ -360,12 +389,8 @@ class CollectFSM(Node):
             match self.state:
                 case State.INIT:
                     self.handle_init()
-                case State.RED:
-                    self.handle_red()
-                case State.GREEN:
-                    self.handle_green()
-                case State.BLUE:
-                    self.handle_blue()
+                case State.CENTER_ROBOT:
+                    self.center_robot()
                 case _:
                     raise Exception("Invalid state: " + str(self.state))
 
@@ -374,42 +399,30 @@ class CollectFSM(Node):
         Function to handle the initialization state
         """
 
-        self.task_info("Collecting task started")
+        self.task_info("Navigation task started")
 
         # TODO: Add here
 
-        self.state = State.RED
+        self.state = State.CENTER_ROBOT
 
-    def handle_red(self):
-        """
-        TODO: Add here
-        """
-
-        self.task_info("RED")
+    def center_robot(self):
+        self.task_info("Centering Robot")
 
         # Quick examples of how to use actions and services in the state machine
-        self.task_info("Requesting drive straight action")
-        asyncio.run(self.drive_straight(0.5))
+        self.task_info("Requesting drive control action")
+        response = asyncio.run(self.send_drive_to_center_goal())
         while not asyncio.run(self.isTaskComplete()):
             time.sleep(0.1)
-
+            self.task_info("In isTaskComplete loop")
             if self.task_goal_handle.is_cancel_requested:
                 asyncio.run(self.cancelTask())
                 raise Exception("Task execution canceled by action client")
 
-        self.task_info("Requesting egg identification service")
-        response = asyncio.run(self.async_service_call(self.egg_id_client, self.egg_id_request))
-        self.task_info("Egg type identified: " + str(response.egg_type))
-
-        self.state = State.GREEN
-
-    def handle_green(self):
-        self.task_info("GREEN")
-        self.state = State.BLUE
-
-    def handle_blue(self):
-        self.task_info("BLUE")
-        self.complete_flag = True
+        if response and self.drivecontrol_result.success:
+            self.task_success("Robot is centered.")
+            self.complete_flag = True
+        else:
+            self.task_warn("Robot is not centered! Staying in CENTER_ROBOT state.")
 
     #########################
     ### END STATE MACHINE ###
@@ -419,7 +432,7 @@ class CollectFSM(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    state_machine = CollectFSM()
+    state_machine = SortFSM()
     # Create a multi-threaded node executor for callback-in-callback threading
     executor = MultiThreadedExecutor()
     executor.add_node(state_machine)
