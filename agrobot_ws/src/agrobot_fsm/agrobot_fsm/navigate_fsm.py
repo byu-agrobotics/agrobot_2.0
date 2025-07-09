@@ -130,7 +130,7 @@ class NavigateFSM(Node):
         """
         self.get_logger().debug("Waiting for 'DriveControl' action server")
         while not self.center_client.wait_for_server(timeout_sec=1.0):
-            self.get_logger.info("'DriveControl' action server not available, waiting...")
+            self.get_logger().info("'DriveControl' action server not available, waiting...")
         goal_msg = DriveControl.Goal()
         send_goal_future = self.center_client.send_goal_async(
             goal_msg, self._feedbackCallback
@@ -146,32 +146,6 @@ class NavigateFSM(Node):
         self.drivecontrol_result = self.result_future.result().result
         self.get_logger().info(f"DriveControl result received: success = {self.drivecontrol_result.success}")
 
-        return True
-
-    async def drive_straight(self, front_distance):
-        """
-        Function to drive straight, based on the nav2_simple_commander code
-        NOTE: Call this with the asyncio.run() function
-        """
-
-        self.get_logger().debug("Waiting for 'DriveStraight' action server")
-        while not self.drive_straight_client.wait_for_server(timeout_sec=1.0):
-            self.get_logger.info("'DriveStraight' action server not available, waiting...")
-        goal_msg = DriveStraight.Goal()
-        goal_msg.front_distance = front_distance
-
-        self.get_logger().info("Driving straight until front distance: " + str(front_distance))
-        send_goal_future = self.drive_straight_client.send_goal_async(
-            goal_msg, self._feedbackCallback
-        )
-        await send_goal_future  # fix for iron/humble threading bug
-        self.goal_handle = send_goal_future.result()
-
-        if not self.goal_handle.accepted:
-            self.get_logger().error("DriveStraight request was rejected!")
-            return False
-
-        self.result_future = self.goal_handle.get_result_async()
         return True
 
     async def cancelTask(self):
