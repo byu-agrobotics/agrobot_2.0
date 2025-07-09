@@ -148,7 +148,7 @@ std_msgs__msg__Bool egg_msg;
 
 #ifdef ENABLE_LED
   rcl_subscription_t LED_sub;
-  std_msgs__msg__Float32 LED_msg;
+  std_msgs__msg__Int8 LED_msg;
 
 #endif
 
@@ -207,26 +207,26 @@ void LED_sub_callback(const void *LED_msgin) {
   CRGB color;
   last_received = millis();
 
-  const agrobot_interfaces__msg__LEDCommand *LED_msg =
-      (const agrobot_interfaces__msg__LEDCommand *)LED_msgin;
-  if (LED_msg->command == 1) {
+  const std_msgs__msg__Int8 *LED_msg =
+      (const std_msgs__msg__Int8*)LED_msgin;
+  if (LED_msg->data == 1) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->command);
+             LED_msg->data);
     color = CRGB::Green;
   } 
-  else if (LED_msg->command == 2) {
+  else if (LED_msg->data == 2) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->command);
+             LED_msg->data);
     color = CRGB::Blue;
   }
-  else if (LED_msg->command == 3) {
+  else if (LED_msg->data == 3) {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->command);
+             LED_msg->data);
     color = CRGB::Red;
   }
   else {
     DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->command);
+             LED_msg->data);
     color = CRGB::Black;
   }
 
@@ -322,7 +322,7 @@ bool create_entities() {
      RCCHECK(rclc_subscription_init_default(
       &LED_sub,
       &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int8),
       "/LED"));
 
   // Add subscriber to the executor
