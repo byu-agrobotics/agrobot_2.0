@@ -8,7 +8,9 @@ from agrobot_interfaces.msg import DriveCommand
 # TODO: Make these parameters?
 ROBOCLAW_ADDR = 0x80
 ROBOCLAW_BAUD = 115200
-ROBOCLAW_NAME = "/dev/roboclaw"  # From udev rule
+# ROBOCLAW_NAME = "/dev/roboclaw"  # From udev rule
+# ROBOCLAW_NAME = "/dev/ttyACM0"
+ROBOCLAW_NAME = "/dev/serial/by-id/usb-03eb_USB_Roboclaw_2x7A-if00"  # For testing
 TIMEOUT_THRESHOLD = 2  # seconds
 ROBOCLAW_MAX_CMD_VAL = 127  # Maximum command value for Roboclaw (0-127)
 
@@ -21,7 +23,7 @@ class RoboclawWrapper(Node):
     Node that interfaces with the roboclaw motor controller to drive the robot.
 
     Subscribers:
-        - drive/command (agrobot_interfaces/msg/DriveCommand)
+        - cmd/drive (agrobot_interfaces/msg/DriveCommand)
     """
 
     def __init__(self):
@@ -29,7 +31,7 @@ class RoboclawWrapper(Node):
 
         self.drive_command_sub = self.create_subscription(
             DriveCommand,
-            "drive/command",
+            "cmd/drive",
             self.drive_command_callback,
             10,
         )
@@ -58,7 +60,7 @@ class RoboclawWrapper(Node):
 
     def drive_command_callback(self, msg):
         """
-        Callback function for the drive/command subscriber.
+        Callback function for the cmd/drive subscriber.
         Receives DriveCommand messages and sends appropriate commands to Roboclaw.
 
         :param msg: The DriveCommand message.

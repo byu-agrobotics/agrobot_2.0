@@ -31,6 +31,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/DriveControl.action"
   "action/DriveStraight.action"
   "action/Turn.action"
+  "action/Center.action"
   "srv/IdentifyEgg.srv"
   "msg/DriveCommand.msg"
   "msg/ToFData.msg"

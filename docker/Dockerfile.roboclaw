@@ -1,0 +1,28 @@
+# Dockerfile for the Roboclaw container
+
+# Start from the official ROS 2 Humble base image.
+# This provides a clean environment with ROS 2 pre-installed.
+FROM ros:humble-ros-base
+
+# Set the default working directory for the container.
+# Any subsequent commands (like RUN, CMD, ENTRYPOINT) will be executed from here.
+WORKDIR /home/roboclaw
+
+# Copy the local 'startup' directory into the image at the root directory.
+# This makes your entrypoint script available inside the container.
+COPY ./roboclaw /roboclaw
+
+# Make the entrypoint script executable.
+# Without execute permissions, the container won't be able to run the script.
+RUN chmod +x /roboclaw/roboclaw_entrypoint.sh
+
+# Dependencies for the Roboclaw container.
+RUN apt-get update && apt-get install -y \
+    python3-pip 
+    
+    
+RUN pip3 install \
+    pyserial 
+
+WORKDIR /home/roboclaw/ros2_ws    
+

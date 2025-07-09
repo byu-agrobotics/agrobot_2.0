@@ -1,13 +1,17 @@
-# Created by Nelson Durrant, Oct 2024
+# docker-compose.yml
+
+version: '3.8' # It's good practice to specify a version
+
 services:
   agrobot:
     image: byuagrobotics1/agrobot_2.0:latest
     container_name: agrobot-ct
-    build: .
+    build:
+      context: . # Assumes Dockerfile for agrobot is in the same directory
+      dockerfile: Dockerfile # Specify if you have different Dockerfiles
     user: agrobot-docker
-    group_add:
-      - dialout
-    network_mode: host
+    networks:
+      - agrobot_network
     privileged: true
     environment:
       - DISPLAY=$DISPLAY # Required for GUI applications
@@ -28,3 +32,32 @@ services:
     tty: true  # Equivalent to -it in docker run
     restart: always  # Keeps the container running after exit unless you want it to be removed like with --rm
     entrypoint: ["/startup/entrypoint.sh"]
+
+  roboclaw:
+    image: roboclaw:latest
+    container_name: roboclaw-ct
+    build:
+      context: . # Assumes Dockerfile for roboclaw is in the same directory
+      dockerfile: Dockerfile.roboclaw # Specify if you have different Dockerfiles
+    user: root
+    networks:
+      - agrobot_network
+    privileged: true
+    volumes:
+      - ../agrobot_ws/src/agrobot_navigation:/home/roboclaw/ros2_ws/src/agrobot_navigation
+      - ../agrobot_ws/src/agrobot_interfaces:/home/roboclaw/ros2_ws/src/agrobot_interfaces
+      - ./roboclaw:/roboclaw
+      - /dev:/dev:rw
+      - /etc/udev:/etc/udev:rw
+      - /dev/shm:/dev/shm
+      - /etc/localtime:/etc/localtime:ro
+    stdin_open: true
+    tty: true
+    restart: always
+    entrypoint: ["/roboclaw/roboclaw_entrypoint.sh"]
+
+# Define the network that the services will share
+networks:
+  agrobot_network:
+    driver: bridge
+

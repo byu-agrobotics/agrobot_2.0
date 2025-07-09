@@ -177,6 +177,9 @@ USER $NAME
 
 # Install the serial and pyserial libraries - Nelson Durrant, May 2025
 # Used by the roboclaw library for serial communication
-RUN pip3 install serial pyserial
 
+RUN pip3 install serial pyserial 
+
+# Used by the drive_controller node for PID control
 RUN pip3 install simple-pid
+
