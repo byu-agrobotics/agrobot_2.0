@@ -36,6 +36,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/DriveCommand.msg"
   "msg/ToFData.msg"
   "msg/BatteryStatus.msg"
+  "msg/ServoCommand.msg"
   DEPENDENCIES std_msgs
 )
 
