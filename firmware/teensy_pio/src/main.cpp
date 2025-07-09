@@ -103,7 +103,7 @@
 #define VOLT_PIN 18
 #define CURRENT_PIN 17
 #define LED_PIN 13 // Built-in Teensy LED
-#define RBG_PIN 22
+#define RGB_PIN 22
 #define NUM_LEDS 64
 #define BRIGHTNESS  32
 #define LED_TYPE    WS2812B
