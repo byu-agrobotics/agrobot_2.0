@@ -320,7 +320,7 @@ bool create_entities() {
 #endif
 
 #ifdef ENABLE_LED
-     RCCHEK(rclc_subscription_init_default(
+     RCCHECK(rclc_subscription_init_default(
       &LED_sub,
       &node,
       ROSIDL_GET_MSG_TYPE_SUPPORT(agrobot_interfaces, msg, LEDCommand),
