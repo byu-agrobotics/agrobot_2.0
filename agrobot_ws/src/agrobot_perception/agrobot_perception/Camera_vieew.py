@@ -6,7 +6,6 @@ CAMERA_INDEX = 0  # Change to your camera device index
 # Apply camera settings - update controls after checking your camera
 os.system(
     f"v4l2-ctl -d /dev/video{CAMERA_INDEX} -c "
-    "exposure_auto=1,"
     "white_balance_temperature_auto=0,"
     "white_balance_temperature=3300,"
     "exposure_absolute=500"
