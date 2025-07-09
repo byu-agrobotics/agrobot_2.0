@@ -29,7 +29,7 @@ class EggID(Node):
 
         # Tune the exposure and white balance values here to get the colors to be what they need to be
         os.system(
-            "v4l2-ctl -d 8 -c auto_exposure=1,exposure_dynamic_framerate=0,white_balance_automatic=0,white_balance_temperature=3300,exposure_time_absolute=500"
+            "v4l2-ctl -d 0 -c auto_exposure=1,exposure_dynamic_framerate=0,white_balance_automatic=0,white_balance_temperature=3300,exposure_time_absolute=500"
         )
         self.color_ranges = {
             "good": ((70, 23, 11), (100, 209, 237)),
