@@ -548,6 +548,11 @@ void setup() {
 #endif // ENABLE_BT_DEBUG
 #endif // ENABLE_TOF_SENSORS
 
+#ifdef ENABLE_LED
+  FastLED.addLeds<LED_TYPE, RGB_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+  FastLED.setBrightness(BRIGHTNESS);  
+#endif //ENABLE_LED
+
   state = WAITING_AGENT;
 }
 
