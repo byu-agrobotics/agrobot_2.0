@@ -71,11 +71,10 @@ class EggID(Node):
         self.get_logger().info("Received request to identify an egg!")
 
         image = self.read()
-        cv2.imshow("Egg Camera Feed", image)
 
-        # # TODO: GET RID OF THE BELOW LATER (JUST FOR TESTING RN BC NO CAMERA CONNECTED)
-        response.egg_type = 1  # 1: small, 2: large, 3: bad
-        return response
+        # # # TODO: GET RID OF THE BELOW LATER (JUST FOR TESTING RN BC NO CAMERA CONNECTED)
+        # response.egg_type = 1  # 1: small, 2: large, 3: bad
+        # return response
 
         # Helpful debugging code
         # self.get_logger().info("CV_CAP_PROP_FRAME_WIDTH: '{}'".format(self.egg_camera.get(cv2.CAP_PROP_FRAME_WIDTH)))
