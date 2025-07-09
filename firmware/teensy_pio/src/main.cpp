@@ -28,6 +28,7 @@
 #include <Servo.h>
 #include <geometry_msgs/msg/twist.h>
 #include <std_msgs/msg/float32.h>
+#include <std_msgs/msg/int8.h>
 #include <FastLED.h>
 // #include <frost_interfaces/msg/u_command.h>
 
@@ -203,30 +204,21 @@ void blink_led(int count, int duration_ms) {
 
 #ifdef ENABLE_LED
 void LED_sub_callback(const void *LED_msgin) {
-  DBG_PRINT("[CALLBACK] LED_sub_callback triggered");
   CRGB color;
   last_received = millis();
 
   const std_msgs__msg__Int8 *LED_msg =
       (const std_msgs__msg__Int8*)LED_msgin;
   if (LED_msg->data == 1) {
-    DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->data);
     color = CRGB::Green;
   } 
   else if (LED_msg->data == 2) {
-    DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->data);
     color = CRGB::Blue;
   }
   else if (LED_msg->data == 3) {
-    DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->data);
     color = CRGB::Red;
   }
   else {
-    DBG_PRINTF("[CALLBACK] Received LED command: %d",
-             LED_msg->data);
     color = CRGB::Black;
   }
 
