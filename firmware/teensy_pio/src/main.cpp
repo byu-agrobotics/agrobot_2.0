@@ -36,7 +36,7 @@
 
 #define ENABLE_ACTUATORS
 #define ENABLE_TOF_SENSORS
-// #define ENABLE_LED
+#define ENABLE_LED
 #define ENABLE_BATTERY
 #define ENABLE_BT_DEBUG
 
@@ -88,7 +88,7 @@
 
 // micro-ROS config values
 #define BAUD_RATE 6000000
-#define CALLBACK_TOTAL 3
+#define CALLBACK_TOTAL 6
 #define SYNC_TIMEOUT 1000
 
 // hardware pin values
