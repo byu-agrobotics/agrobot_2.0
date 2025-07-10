@@ -50,6 +50,7 @@
 #define ENABLE_STEPPER_1
 #define ENABLE_SERVOS
 #define ENABLE_CONVEYOR
+#define ENABLE_FEEDER
 
 #define EN1       2                   // EN pin for left TMF8801
 #define EN2       3                   // EN pin for right TMF8801
@@ -97,7 +98,7 @@
 
 // micro-ROS config values
 #define BAUD_RATE 6000000
-#define CALLBACK_TOTAL 7
+#define CALLBACK_TOTAL 8
 #define SYNC_TIMEOUT 1000
 
 // hardware pin values
@@ -174,6 +175,12 @@ rclc_executor_t executor; // Added executor declaration
   rcl_subscription_t conveyor_sub;
 
 #endif // ENABLE_CONVEYOR
+
+// Feeder subscriber
+#ifdef ENABLE_FEEDER
+  std_msgs__msg__Bool feeder_msg;
+  rcl_subscription_t feeder_sub;
+#endif // ENABLE_FEEDER
 
 // publisher objects
 // BatteryPub battery_pub;
@@ -274,6 +281,25 @@ void conveyor_sub_callback(const void *conveyor_msgin) {
   const std_msgs__msg__Bool *conveyor_msg =
       (const std_msgs__msg__Bool*)conveyor_msgin;
   if (conveyor_msg->data == true) {
+    color = CRGB::Green;
+  } 
+  else{
+    color = CRGB::Black;
+  }
+  fill_solid(leds, NUM_LEDS, color);
+  FastLED.show();
+  delay(100);  // update rate
+}
+#endif // ENBLE_CONVEYOR
+
+#ifdef ENABLE_FEEDER
+void feeder_sub_callback(const void *feeder_msgin) {
+  CRGB color;
+  last_received = millis();
+
+  const std_msgs__msg__Bool *feeder_msg =
+      (const std_msgs__msg__Bool*)feeder_msgin;
+  if (feeder_msg->data == true) {
     color = CRGB::Green;
   } 
   else{
@@ -395,6 +421,16 @@ bool create_entities() {
       "/conveyor"));
 
   RCCHECK(rclc_executor_add_subscription(&executor, &conveyor_sub, &conveyor_msg, &conveyor_sub_callback, ON_NEW_DATA));
+#endif //ENBLE_CONVEYOR
+
+#ifdef ENABLE_FEEDER
+  RCCHECK(rclc_subscription_init_default(
+      &feeder_sub,
+      &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+      "/feeder"));
+
+  RCCHECK(rclc_executor_add_subscription(&executor, &feeder_sub, &feeder_msg, &feeder_sub_callback, ON_NEW_DATA));
 #endif //ENBLE_CONVEYOR
 
 #ifdef ENABLE_BT_DEBUG
