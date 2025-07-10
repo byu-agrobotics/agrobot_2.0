@@ -39,11 +39,12 @@
 
 // #define ENABLE_BIG_HBRIDGE
 // #define ENABLE_SMALL_HBRIDGE
-// #define ENABLE_IR_SENSOR
+#define ENABLE_IR_SENSOR
 // #define ENABLE_SERVOS
 // #define ENABLE_LED_MATRIX
 
 #define ENABLE_STEPPER_1
+#define pinIRd 8 // IR sensor pin
 
 #define EN1       2                   // EN pin for left TMF8801
 #define EN2       3                   // EN pin for right TMF8801
@@ -82,12 +83,14 @@
 #define CURRENT_PIN 17
 #define LED_PIN 13 // Built-in Teensy LED
 
+
 // sensor baud rates
 #define BT_DEBUG_RATE 9600
 
 // sensor update rates
 #define BATTERY_MS 1000 // arbitrary
 #define TOF_MS 5     // arbitrary
+#define IR_MS 500    // Read the IR sensor every 500ms
 
 // time of last received command (used as a fail safe)
 unsigned long last_received = 0;
@@ -100,6 +103,10 @@ rclc_support_t support;
 rcl_allocator_t allocator;
 rcl_node_t node;
 rclc_executor_t executor; // Added executor declaration
+
+// Egg detection publisher
+rcl_publisher_t egg_publisher;
+std_msgs__msg__Bool egg_msg;
 
 // Stepper motor ROS objects
 #ifdef ENABLE_STEPPER_1
@@ -116,6 +123,9 @@ rclc_executor_t executor; // Added executor declaration
 
 // TOF publisher object
 TofPub tof_pub;
+
+// IR sensor value
+volatile int IRvalueD = 0;
 
 // sensor objects
 SoftwareSerial BTSerial(BT_MC_RX, BT_MC_TX);
@@ -202,6 +212,14 @@ bool create_entities() {
   tof_pub.setup(node);
   // blink_led(3, 250);
 
+#ifdef ENABLE_IR_SENSOR
+  RCCHECK(rclc_publisher_init_default(
+      &egg_publisher,
+      &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+      "egg_detected")); // This is the topic name
+#endif // ENABLE_IR_SENSOR
+
 #ifdef ENABLE_STEPPER_1
   // Initialize stepper publisher
   RCCHECK(rclc_publisher_init_default(
@@ -266,10 +284,11 @@ void setup() {
 
   // set up the indicator light
   pinMode(LED_PIN, OUTPUT);
+  pinMode(pinIRd, INPUT); // Set the IR sensor pin as an input
 
 #ifdef ENABLE_BT_DEBUG
   BTSerial.begin(BT_DEBUG_RATE);
-#endif // ENABLE_BT DEBUG
+#endif // ENABLE_BT_DEBUG
 
 #ifdef ENABLE_BATTERY
   pinMode(CURRENT_PIN, INPUT);
@@ -437,6 +456,29 @@ void read_battery() {
   // battery_pub.publish(voltage, current);
 }
 
+#ifdef ENABLE_IR_SENSOR
+void read_ir_sensor() {
+  IRvalueD = digitalRead(pinIRd);
+
+  // A LOW reading means the sensor is triggered (aligned).
+  if (IRvalueD == LOW) {
+    digitalWrite(LED_PIN, HIGH); // Turn on LED to indicate alignment
+    egg_msg.data = true;         // Set message to true (egg detected)
+  } else {
+    digitalWrite(LED_PIN, LOW);  // Turn off LED
+    egg_msg.data = false;        // Set message to false (no egg)
+  }
+
+  // Publish the message to the "egg_detected" topic
+  RCSOFTCHECK(rcl_publish(&egg_publisher, &egg_msg, NULL));
+
+  #ifdef ENABLE_BT_DEBUG
+    BTSerial.print("Egg detected: ");
+    BTSerial.println(egg_msg.data ? "true" : "false");
+  #endif
+}
+#endif // ENABLE_IR_SENSOR
+
 #ifdef ENABLE_STEPPER_1
 void stepper_callback(const void *msgin) {
   const geometry_msgs__msg__Twist *twist_msg = (const geometry_msgs__msg__Twist *)msgin;
@@ -543,6 +585,11 @@ void loop() {
 // #ifdef ENABLE_BATTERY
 //       EXECUTE_EVERY_N_MS(BATTERY_MS, read_battery());
 // #endif // ENABLE_BATTERY
+
+#ifdef ENABLE_IR_SENSOR
+      // Read the IR sensor data at the specified interval
+      EXECUTE_EVERY_N_MS(IR_MS, read_ir_sensor());
+#endif // ENABLE_IR_SENSOR
 
 #ifdef ENABLE_STEPPER_1
     // Publish stepper position every 100 ms
