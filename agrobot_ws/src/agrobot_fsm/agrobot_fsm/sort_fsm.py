@@ -163,14 +163,13 @@ class SortFSM(Node):
 
     def LED_alert(self, egg):
         led_msg = Int8()
-        if egg == "Large":
-            led_msg.data = 2       # 1: small, 2: large, 3: bad
-        elif egg == "Medium":
-            led_msg.data = 1
-        elif egg == "Bad":
-            led_msg.data = 3
-        self.get_logger().info(f'LED publishing message: "{led_msg.data}"')
-        self.LED_pub.publish(led_msg)
+        count = 0
+
+        while count < 50:
+            led_msg.data = egg
+            self.get_logger().info(f'LED publishing message: "{led_msg.data}"')
+            self.LED_pub.publish(led_msg)
+            count += 1
 
     def FlipEgg(self):
         
