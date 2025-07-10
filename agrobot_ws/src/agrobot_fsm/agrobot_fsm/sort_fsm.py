@@ -244,8 +244,9 @@ class SortFSM(Node):
         rclpy.spin_until_future_complete(self, future)
         
         if future.result() is not None:
-            self.get_logger().info(f'Result: {future.result()}')
-            return future.result()
+            result = future.result()
+            self.get_logger().info(f'Result egg_type: {result.egg_type}')
+            return result.egg_type
         else:
             self.get_logger().error('Service call failed')
             return None
