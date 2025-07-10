@@ -110,6 +110,7 @@ class SortFSM(Node):
         self.flip_timer = None
         self.egg_detected = False
         self.prev_state = None
+        self.init_logged = False
 
         print("Setting up")
         # Create a timer to call `state_loop` every 0.1 seconds (10 Hz)
@@ -288,7 +289,10 @@ class SortFSM(Node):
         Function to handle the initialization state
         initializes the conveyor belt, turns on the camera
         """
-        # self.get_logger().info("Starting conveyor belt and combine")
+        if not self.init_logged:
+            self.get_logger().info("Starting conveyor belt and combine")
+            self.init_logged = True
+                
         # Start combine belt
         # combine_msg = Bool()
         # combine_msg.data = True
@@ -305,6 +309,7 @@ class SortFSM(Node):
             conveyor_msg.data = False
             self.conveyor_pub.publish(conveyor_msg)
             # read the egg
+            self.init_logged = False
             self.state = State.READ_EGG
 
         
@@ -323,7 +328,9 @@ class SortFSM(Node):
         """
         Function to handle reading the egg using the camera        
         """
-        # self.get_logger().info("Sendiing identifyegg request")
+        if not self.init_logged:
+            self.get_logger().info("Sendiing identifyegg request")
+            self.init_logged = True
         egg_type = self.send_identifyegg_req()
         # egg_type = "Large"
         # egg_type = self.identify_egg()
