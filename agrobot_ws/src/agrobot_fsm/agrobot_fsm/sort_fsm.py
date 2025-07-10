@@ -288,7 +288,7 @@ class SortFSM(Node):
         Function to handle the initialization state
         initializes the conveyor belt, turns on the camera
         """
-        self.get_logger().info("Starting conveyor belt and combine")
+        # self.get_logger().info("Starting conveyor belt and combine")
         # Start combine belt
         # combine_msg = Bool()
         # combine_msg.data = True
@@ -323,7 +323,7 @@ class SortFSM(Node):
         """
         Function to handle reading the egg using the camera        
         """
-        self.get_logger().info("Sendiing identifyegg request")
+        # self.get_logger().info("Sendiing identifyegg request")
         egg_type = self.send_identifyegg_req()
         # egg_type = "Large"
         # egg_type = self.identify_egg()
