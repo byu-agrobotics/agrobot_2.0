@@ -29,7 +29,7 @@ from rclpy.node import Node
 # from sensor_msgs.msg import NavSatFix
 from agrobot_interfaces.msg import ServoCommand
 from agrobot_interfaces.srv import IdentifyEgg
-from std_msgs.msg import Bool, int8
+from std_msgs.msg import Bool, Int8
 # from std_srvs.srv import Trigger, SetBool
 # from threading import RLock
 # from typing import Any
@@ -88,7 +88,7 @@ class SortFSM(Node):
         # Set up publishers
 
         # publishers
-        self.LED_pub = self.create_publisher(int8, "/LED", 10)
+        self.LED_pub = self.create_publisher(Int8, "/LED", 10)
         self.servo_pub = self.create_publisher(ServoCommand, "/servo", 10)
         # self.combine_pub = self.create_publisher(Bool, '/combine', 10)
         self.conveyor_pub = self.create_publisher(Bool, '/conveyor', 10)
