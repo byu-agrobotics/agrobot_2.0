@@ -27,7 +27,7 @@ from rclpy.node import Node
 # from rclpy.task import Future
 # from rover_interfaces.action import AutonomyTask
 # from sensor_msgs.msg import NavSatFix
-from agrobot_interfaces.msg import ServoCommand, LEDCommand
+from agrobot_interfaces.msg import ServoCommand
 from agrobot_interfaces.srv import IdentifyEgg
 from std_msgs.msg import Bool, int8
 # from std_srvs.srv import Trigger, SetBool
