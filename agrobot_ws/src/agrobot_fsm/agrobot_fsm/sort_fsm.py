@@ -245,26 +245,39 @@ class SortFSM(Node):
         self.get_logger().info(f'Eggdetect received message: "{msg.data}"')
 
 
-    def send_identifyegg_req(self):
-        self.get_logger().info("Attempting to call IdentifyEgg service")
+    # def send_identifyegg_req(self):
+    #     self.get_logger().info("Attempting to call IdentifyEgg service")
 
-        while not self.identifyegg.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('IdentifyEgg service not available, waiting again...')
+    #     while not self.identifyegg.wait_for_service(timeout_sec=1.0):
+    #         self.get_logger().info('IdentifyEgg service not available, waiting again...')
 
-        req = IdentifyEgg.Request()
-        future = self.identifyegg.call_async(req)
+    #     req = IdentifyEgg.Request()
+    #     future = self.identifyegg.call_async(req)
 
-        self.get_logger().info("Service called, waiting for result...")
-        rclpy.spin_until_future_complete(self, future)
-        self.get_logger().info("Finished waiting on future")
+    #     self.get_logger().info("Service called, waiting for result...")
+    #     rclpy.spin_until_future_complete(self, future)
+    #     self.get_logger().info("Finished waiting on future")
 
-        if future.result() is not None:
-            result = future.result()
-            self.get_logger().info(f'Result egg_type: {result.egg_type}')
-            return result.egg_type
-        else:
-            self.get_logger().error('Service call failed')
-            return None
+    #     if future.result() is not None:
+    #         result = future.result()
+    #         self.get_logger().info(f'Result egg_type: {result.egg_type}')
+    #         return result.egg_type
+    #     else:
+    #         self.get_logger().error('Service call failed')
+    #         return None
+        
+
+    def handle_egg_response(self, future):
+        try:
+            response = future.result()
+            if response is not None:
+                self.get_logger().info(f"Result egg_type: {response.egg_type}")
+                self.LED_alert(response.egg_type)
+                self.state = State.MOVE_EGG
+            else:
+                self.get_logger().error("Service call returned None")
+        except Exception as e:
+            self.get_logger().error(f"Service call failed: {e}")
 
 
     ###########################
@@ -330,13 +343,13 @@ class SortFSM(Node):
         Function to handle reading the egg using the camera        
         """
         if not self.init_logged:
-            self.get_logger().info("Sendiing identifyegg request")
+            self.get_logger().info("Sending identifyegg request")
             self.init_logged = True
 
-        egg_type = self.send_identifyegg_req()   # Note the parentheses to call the method
-        if egg_type is not None:
-            self.get_logger().info(f"Received egg_type from service: {egg_type}")
-            self.LED_alert(egg_type)
+            req = IdentifyEgg.Request()
+            future = self.identifyegg.call_async(req)
+            future.add_done_callback(self.handle_egg_response)
+        
         # egg_type = "Large"
         # egg_type = self.identify_egg()
         # self.moving_egg = egg_type
