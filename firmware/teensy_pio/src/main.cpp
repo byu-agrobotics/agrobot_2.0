@@ -854,7 +854,7 @@ void loop() {
 
 #ifdef ENABLE_EGGDETECT
     EXECUTE_EVERY_N_MS(100, {
-          egg_mssg.data = true;
+          egg_msg.data = true;
           RCSOFTCHECK(rcl_publish(&eggdetect_pub, &egg_msg, NULL));
       });
 
