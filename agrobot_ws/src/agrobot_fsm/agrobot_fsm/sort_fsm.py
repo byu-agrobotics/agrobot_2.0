@@ -160,13 +160,13 @@ class SortFSM(Node):
         self.servo_pub.publish(self.servo_msg)
 
     def LED_alert(self, egg):
-        led_msg = LEDCommand()
+        led_msg = Int8()
         if egg == "Large":
-            led_msg.command = 2       # 1: small, 2: large, 3: bad
+            led_msg.data = 2       # 1: small, 2: large, 3: bad
         elif egg == "Medium":
-            led_msg.command = 1
+            led_msg.data = 1
         elif egg == "Bad":
-            led_msg.command = 3
+            led_msg.data = 3
         self.LED_pub.publish(led_msg)
 
     def FlipEgg(self):
