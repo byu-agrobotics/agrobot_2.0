@@ -200,7 +200,7 @@ class SortFSM(Node):
         count = 0
         conveyor_msg = Bool()
 
-        while count < 10:
+        while count < 50:
             conveyor_msg.data = False
             self.conveyor_pub.publish(conveyor_msg)
             count += 1
@@ -246,14 +246,18 @@ class SortFSM(Node):
 
 
     def send_identifyegg_req(self):
+        self.get_logger().info("Attempting to call IdentifyEgg service")
+
         while not self.identifyegg.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('IdentifyEgg service not available, waiting again...')
 
         req = IdentifyEgg.Request()
-
         future = self.identifyegg.call_async(req)
+
+        self.get_logger().info("Service called, waiting for result...")
         rclpy.spin_until_future_complete(self, future)
-        
+        self.get_logger().info("Finished waiting on future")
+
         if future.result() is not None:
             result = future.result()
             self.get_logger().info(f'Result egg_type: {result.egg_type}')
