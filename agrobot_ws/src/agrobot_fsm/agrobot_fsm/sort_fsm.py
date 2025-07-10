@@ -367,10 +367,10 @@ class SortFSM(Node):
 
         # TODO: wait either on a timer OR wait on the hall effect sensor
 
-        # move the carriage
-        carriage_msg = Bool()
-        carriage_msg.data = True
-        self.carriage_pub.publish(carriage_msg)
+        # # move the carriage
+        # carriage_msg = Bool()
+        # carriage_msg.data = True
+        # self.carriage_pub.publish(carriage_msg)
 
         # if self.moving_egg == 1:
         #     # move linear actuator to position 1

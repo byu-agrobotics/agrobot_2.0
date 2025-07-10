@@ -183,7 +183,7 @@ class EggID(Node):
                 #     2,
                 # )
 
-                egg_type = 1
+                egg_type = 2 # usually 1
 
         cv2.imwrite(f"/tmp/test{self.imageCount}.jpeg", image)
 
