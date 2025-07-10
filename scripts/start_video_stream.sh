@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# Function to clean up background processes
+cleanup() {
+    echo "Stopping video stream..."
+    # Kill the ffmpeg process, which will also stop libcamera-vid
+    sudo pkill ffmpeg
+    sudo pkill libcamera-vid
+    echo "Video stream stopped."
+    exit 0
+}
+
+# Trap Ctrl+C (SIGINT) and call the cleanup function
+trap cleanup SIGINT
+
 set -e
 
 echo "Stopping any running libcamera-vid or ffmpeg processes..."
@@ -22,3 +35,8 @@ libcamera-vid -t 0 --inline --width 640 --height 480 --framerate 30 --codec yuv4
 ffmpeg -f rawvideo -pix_fmt yuv420p -s 640x480 -i - -f v4l2 -pix_fmt rgb24 /dev/video8 > ~/video_stream.log 2>&1 &
 
 echo "Video stream started in background. Logs: ~/video_stream.log"
+echo "Press Ctrl+C to stop the stream."
+
+# Wait indefinitely to keep the script running
+# so it can be interrupted by Ctrl+C
+wait
