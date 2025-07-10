@@ -9,6 +9,7 @@
  *
  * Subscribes:
  * - /stepper_cmd_vel (geometry_msgs/msg/Twist)
+ * - /hbridge_motor_one_command (std_msgs/msg/Bool)
  *
  * Publishes:
  * - /tof/data (frost_interfaces/msg/TofData)
@@ -34,10 +35,10 @@
 #define ENABLE_ACTUATORS
 #define ENABLE_TOF_SENSORS
 #define ENABLE_LEDS
-#define ENABLE_BATTERY
+// #define ENABLE_BATTERY
 #define ENABLE_BT_DEBUG
 
-// #define ENABLE_HBRIDGE
+#define ENABLE_HBRIDGE
 #define ENABLE_IR_SENSOR
 // #define ENABLE_SERVOS
 // #define ENABLE_LED_MATRIX
@@ -72,7 +73,7 @@
 #define BT_MC_TX 35
 // #define VOLT_PIN 18
 // #define CURRENT_PIN 17
-// #define LED_PIN 13 // Built-in Teensy LED
+#define LED_PIN 13 // Built-in Teensy LED
 //LED matrix
 #define LED_MOSI_PIN 13 // Pin for the LED matrix (if used)
 #define LED_CLOCK_PIN 38 // Pin for the LED matrix clock (if used)
@@ -94,7 +95,7 @@
 
 // micro-ROS config values
 #define BAUD_RATE 6000000
-#define CALLBACK_TOTAL 6
+#define CALLBACK_TOTAL 7 // Increased for H-bridge
 #define SYNC_TIMEOUT 1000
 
 
@@ -134,6 +135,11 @@ std_msgs__msg__Bool egg_msg;
   volatile float motor_position = 0.0; // In revolutions
 #endif
 
+#ifdef ENABLE_HBRIDGE
+  rcl_subscription_t hbridge_subscriber;
+  std_msgs__msg__Bool hbridge_msg;
+#endif
+
 // publisher objects
 // BatteryPub battery_pub;
 
@@ -167,6 +173,10 @@ enum states {
 // Added forward declaration for the callback function
 #ifdef ENABLE_STEPPER_1
   void stepper_callback(const void *msgin);
+#endif
+
+#ifdef ENABLE_HBRIDGE
+  void hbridge_callback(const void *msgin);
 #endif
 
 // Helper function to blink the LED a specific number of times
@@ -255,6 +265,18 @@ bool create_entities() {
   RCCHECK(rclc_executor_add_subscription(&executor, &stepper_subscriber, &twist_msg, &stepper_callback, ON_NEW_DATA));
 #endif
 
+#ifdef ENABLE_HBRIDGE
+  // Initialize H-bridge subscriber
+  RCCHECK(rclc_subscription_init_default(
+    &hbridge_subscriber,
+    &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+    "/hbridge_motor_one_command"));
+
+  // Add subscriber to the executor
+  RCCHECK(rclc_executor_add_subscription(&executor, &hbridge_subscriber, &hbridge_msg, &hbridge_callback, ON_NEW_DATA));
+#endif
+
 #ifdef ENABLE_BT_DEBUG
   BTSerial.println("[INFO] Micro-ROS entities created successfully");
 #endif // ENABLE_BT_DEBUG
@@ -273,6 +295,10 @@ void destroy_entities() {
   // destroy publishers
   // battery_pub.destroy(node);
   tof_pub.destroy(node);
+
+#ifdef ENABLE_HBRIDGE
+  rcl_subscription_fini(&hbridge_subscriber, &node);
+#endif
 
   // <<< FIXED: Clean up the executor
   rclc_executor_fini(&executor);
@@ -306,14 +332,14 @@ void setup() {
   BTSerial.begin(BT_DEBUG_RATE);
 #endif // ENABLE_BT_DEBUG
 
-#ifdef ENABLE_BATTERY
-  pinMode(CURRENT_PIN, INPUT);
-  pinMode(VOLT_PIN, INPUT);
+// #ifdef ENABLE_BATTERY
+//   pinMode(CURRENT_PIN, INPUT);
+//   pinMode(VOLT_PIN, INPUT);
 
-#ifdef ENABLE_BT_DEBUG
-  BTSerial.println("[INFO] Battery Sensor enabled");
-#endif // ENABLE_BT_DEBUG
-#endif // ENABLE_BATTERY
+// #ifdef ENABLE_BT_DEBUG
+//   BTSerial.println("[INFO] Battery Sensor enabled");
+// #endif // ENABLE_BT_DEBUG
+// #endif // ENABLE_BATTERY
 
 #ifdef ENABLE_STEPPER_1
   // Configure stepper pins as outputs
@@ -323,6 +349,21 @@ void setup() {
     BTSerial.println("[INFO] Stepper 1 enabled");
   #endif
 #endif
+
+#ifdef ENABLE_HBRIDGE
+  pinMode(HBRIDGE_IN1, OUTPUT);
+  pinMode(HBRIDGE_IN2, OUTPUT);
+  pinMode(HBRIDGE_IN3, OUTPUT);
+  pinMode(HBRIDGE_IN4, OUTPUT);
+  pinMode(HBRIDGE_ENA, OUTPUT);
+  pinMode(HBRIDGE_ENB, OUTPUT);
+
+  digitalWrite(HBRIDGE_ENA, HIGH);
+  digitalWrite(HBRIDGE_ENB, HIGH);
+#ifdef ENABLE_BT_DEBUG
+  BTSerial.println("[INFO] H-Bridge enabled");
+#endif // ENABLE_BT_DEBUG
+#endif // ENABLE_HBRIDGE
 
 #ifdef ENABLE_TOF_SENSORS // TODO: Add ifdefs for BTSerial below
   
@@ -531,6 +572,19 @@ void stepper_callback(const void *msgin) {
 }
 #endif
 
+#ifdef ENABLE_HBRIDGE
+void hbridge_callback(const void *msgin) {
+  const std_msgs__msg__Bool *msg = (const std_msgs__msg__Bool *)msgin;
+  if (msg->data) {
+    digitalWrite(HBRIDGE_IN1, HIGH);
+    digitalWrite(HBRIDGE_IN2, LOW);
+  } else {
+    digitalWrite(HBRIDGE_IN1, LOW);
+    digitalWrite(HBRIDGE_IN2, LOW);
+  }
+}
+#endif
+
 #ifdef ENABLE_TOF_SENSORS
   void read_tof_sensor() {
   // blink_led(4, 250);
@@ -569,6 +623,11 @@ void loop() {
 #ifdef ENABLE_ACTUATORS
     // TODO: Add actuator stop code here
 #endif // ENABLE_ACTUATORS
+
+#ifdef ENABLE_HBRIDGE
+  digitalWrite(HBRIDGE_IN3, LOW);
+  digitalWrite(HBRIDGE_IN4, LOW);
+#endif // ENABLE_HBRIDGE
 
 #ifdef ENABLE_BT_DEBUG
     // BTSerial.println("[INFO] No command received in timeout, stopping actuators");
@@ -614,6 +673,12 @@ void loop() {
         RCSOFTCHECK(rcl_publish(&stepper_publisher, &position_msg, NULL));
     });
 #endif
+
+#ifdef ENABLE_HBRIDGE
+      // Continuously spin the second H-bridge motor slowly
+      digitalWrite(HBRIDGE_IN3, HIGH);
+      digitalWrite(HBRIDGE_IN4, LOW);
+#endif // ENABLE_HBRIDGE
 
 #ifdef ENABLE_TOF_SENSORS
       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());
