@@ -72,7 +72,12 @@
 #define BT_MC_TX 35
 // #define VOLT_PIN 18
 // #define CURRENT_PIN 17
-#define LED_PIN 13 // Built-in Teensy LED
+// #define LED_PIN 13 // Built-in Teensy LED
+//LED matrix
+#define LED_MOSI_PIN 13 // Pin for the LED matrix (if used)
+#define LED_CLOCK_PIN 38 // Pin for the LED matrix clock (if used)
+#define LED_CS_PIN 28 // Pin for the LED matrix chip select (if used)
+
 
 // This is the corrected macro. The stray backslash on the empty line was removed.
 #define EXECUTE_EVERY_N_MS(MS, X)                                             \
