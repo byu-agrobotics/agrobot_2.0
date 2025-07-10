@@ -28,6 +28,7 @@ services:
       - /dev/shm:/dev/shm # Required for inter-container communication
       - /etc/localtime:/etc/localtime:ro # Syncs the container's time with the host
       - /tmp/.X11-unix:/tmp/.X11-unix # Required for GUI applications
+      - $HOME/.Xauthority:/home/agrobot-docker/.Xauthority
     stdin_open: true  # Equivalent to -it in docker run
     tty: true  # Equivalent to -it in docker run
     restart: always  # Keeps the container running after exit unless you want it to be removed like with --rm
