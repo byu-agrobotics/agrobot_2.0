@@ -10,6 +10,7 @@ import rclpy
 # import tf2_geometry_msgs
 # import tf2_ros
 import time
+import asyncio
 # import utm
 # from action_msgs.msg import GoalStatus
 # from aruco_opencv_msgs.msg import ArucoDetection
@@ -308,8 +309,7 @@ class SortFSM(Node):
             # pause conveyor belt
             conveyor_msg.data = False
             self.conveyor_pub.publish(conveyor_msg)
-            # read the egg
-            self.init_logged = False
+            await asyncio.sleep(1.0)   # wait 1 second async
             self.state = State.READ_EGG
 
         
