@@ -1,4 +1,3 @@
-
 /**
  * @file main.cpp
  * @author Nelson Durrant, Brighton Anderson
@@ -28,6 +27,7 @@
 #include <Servo.h>
 #include <geometry_msgs/msg/twist.h>
 #include <std_msgs/msg/float32.h>
+#include <std_msgs/msg/bool.h>
 
 // #include <frost_interfaces/msg/u_command.h>
 
@@ -44,7 +44,7 @@
 // #define ENABLE_LED_MATRIX
 
 #define ENABLE_STEPPER_1
-#define pinIRd 8 // IR sensor pin
+#define pinIRd 25 // IR sensor pin
 
 #define EN1       2                   // EN pin for left TMF8801
 #define EN2       3                   // EN pin for right TMF8801
@@ -58,6 +58,7 @@
   #define STEPS_PER_REV 200
 #endif
 
+// This is the corrected macro. The stray backslash on the empty line was removed.
 #define EXECUTE_EVERY_N_MS(MS, X)                                             \
   do {                                                                        \
     static volatile int64_t init = -1;                                        \
@@ -68,7 +69,6 @@
       X;                                                                      \
       init = uxr_millis();                                                    \
     }                                                                         \
-
   } while (0)
 
 // micro-ROS config values
