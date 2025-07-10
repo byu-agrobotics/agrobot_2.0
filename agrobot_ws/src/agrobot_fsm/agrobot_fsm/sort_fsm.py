@@ -114,7 +114,7 @@ class SortFSM(Node):
         # Create a timer to call `state_loop` every 0.1 seconds (10 Hz)
         self.state = State.INIT
 
-        self.create_timer(5, self.run_sort_sm)
+        self.create_timer(.1, self.run_sort_sm)
 
         # # TODO: Make a launch that ensure the IdentifyEgg script is going in agrobot_perception
         # # Set up clients
@@ -167,6 +167,7 @@ class SortFSM(Node):
             led_msg.data = 1
         elif egg == "Bad":
             led_msg.data = 3
+        self.get_logger().info(f'LED publishing message: "{led_msg.data}"')
         self.LED_pub.publish(led_msg)
 
     def FlipEgg(self):
@@ -260,9 +261,10 @@ class SortFSM(Node):
         """
         Function to run the state machine
         """
-        print("in run_sort_sm")
+        if self.state != self.prev_state:
+            self.get_logger().info("Transitioned to state: " + str(self.state))
+            self.prev_state = self.state
 
-        self.get_logger().info("Transitioned to state: " + str(self.state))
         match self.state:
             case State.INIT:
                 self.handle_init()
@@ -320,7 +322,8 @@ class SortFSM(Node):
         """
         Function to handle reading the egg using the camera        
         """
-        egg_type = self.send_identifyegg_req
+        self.get_logger().info("Sendiing identifyegg request")
+        egg_type = self.send_identifyegg_req()
         # egg_type = "Large"
         # egg_type = self.identify_egg()
         # self.moving_egg = egg_type
