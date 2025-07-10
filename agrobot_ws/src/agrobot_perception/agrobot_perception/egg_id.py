@@ -184,9 +184,9 @@ class EggID(Node):
                 # )
 
                 egg_type = 1
-        self.get_logger().info("Before cv2.imwrite")
+
         cv2.imwrite(f"/tmp/test{self.imageCount}.jpeg", image)
-        self.get_logger().info("After cv2.imwrite")
+
         # Return the egg type for the FSM
         response.egg_type = egg_type  # 1: small, 2: large, 3: bad
         return response

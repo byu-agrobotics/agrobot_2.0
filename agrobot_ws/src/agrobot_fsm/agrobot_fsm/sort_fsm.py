@@ -328,11 +328,14 @@ class SortFSM(Node):
         if not self.init_logged:
             self.get_logger().info("Sendiing identifyegg request")
             self.init_logged = True
-        egg_type = self.send_identifyegg_req()
+
+        egg_type = self.send_identifyegg_req()   # Note the parentheses to call the method
+        if egg_type is not None:
+            self.get_logger().info(f"Received egg_type from service: {egg_type}")
+            self.LED_alert(egg_type)
         # egg_type = "Large"
         # egg_type = self.identify_egg()
         # self.moving_egg = egg_type
-        self.LED_alert(egg_type)
         # self.state = State.MOVE_EGG
 
     def handle_move_egg(self):
