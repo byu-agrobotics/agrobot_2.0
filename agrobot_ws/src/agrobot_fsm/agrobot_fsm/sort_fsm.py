@@ -242,7 +242,7 @@ class SortFSM(Node):
 
     def eggdetect_callback(self, msg):
         self.egg_detected = msg.data
-        self.get_logger().info(f'Eggdetect received message: "{msg.data}"')
+        # self.get_logger().info(f'Eggdetect received message: "{msg.data}"')
 
 
     # def send_identifyegg_req(self):
@@ -324,6 +324,7 @@ class SortFSM(Node):
 
         if self.egg_detected:
             self.turn_off_conveyor()
+            self.init_logged = False
             self.state = State.READ_EGG
 
         
