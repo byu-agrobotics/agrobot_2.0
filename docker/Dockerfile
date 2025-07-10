@@ -194,6 +194,8 @@ RUN apt update && apt install -y \
     x11-apps
 USER $NAME
 
+RUN pip3 install flask opencv-python-headless
+
 # Install the serial and pyserial libraries - Nelson Durrant, May 2025
 # Used by the roboclaw library for serial communication
 

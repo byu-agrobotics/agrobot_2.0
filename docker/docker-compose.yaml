@@ -33,6 +33,8 @@ services:
     tty: true  # Equivalent to -it in docker run
     restart: always  # Keeps the container running after exit unless you want it to be removed like with --rm
     entrypoint: ["/startup/entrypoint.sh"]
+    ports:
+      - "8080:8080"  # host:container
 
   roboclaw:
     image: roboclaw:latest
