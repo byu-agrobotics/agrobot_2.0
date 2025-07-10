@@ -37,26 +37,42 @@
 #define ENABLE_BATTERY
 #define ENABLE_BT_DEBUG
 
-// #define ENABLE_BIG_HBRIDGE
-// #define ENABLE_SMALL_HBRIDGE
+// #define ENABLE_HBRIDGE
 #define ENABLE_IR_SENSOR
 // #define ENABLE_SERVOS
 // #define ENABLE_LED_MATRIX
 
 #define ENABLE_STEPPER_1
 #define pinIRd 25 // IR sensor pin
-
+// TOF enable pins
 #define EN1       2                   // EN pin for left TMF8801
 #define EN2       3                   // EN pin for right TMF8801
 #define EN3       4                   // EN pin for front TMF8801
 #define EN4       5                   // EN pin for back TMF8801
 #define INT       -1                  // INT pin is floating, not used in this demo
-
-#ifdef ENABLE_STEPPER_1
-  #define STEPPER_STEP_PIN 39
-  #define STEPPER_DIR_PIN 38
-  #define STEPS_PER_REV 200
-#endif
+// Stepper motor
+#define STEPPER_STEP_PIN 18
+#define STEPPER_DIR_PIN 19
+#define STEPS_PER_REV 200
+// L298N1 H-Bridge pins
+#define HBRIDGE_IN1 22
+#define HBRIDGE_IN2 23
+#define HBRIDGE_IN3 24
+#define HBRIDGE_IN4 25
+#define HBRIDGE_ENA 16
+#define HBRIDGE_ENB 17
+// Servo pins
+#define SERVO_1_PIN 11 // Pin for servo 1
+#define SERVO_2_PIN 12 // Pin for servo 2
+#define SERVO_3_PIN 14 // Pin for servo 3
+// Big Servo
+#define BIG_SERVO_PIN 29 // Pin for the big servo
+// hardware pin values
+#define BT_MC_RX 34
+#define BT_MC_TX 35
+// #define VOLT_PIN 18
+// #define CURRENT_PIN 17
+#define LED_PIN 13 // Built-in Teensy LED
 
 // This is the corrected macro. The stray backslash on the empty line was removed.
 #define EXECUTE_EVERY_N_MS(MS, X)                                             \
@@ -76,12 +92,7 @@
 #define CALLBACK_TOTAL 6
 #define SYNC_TIMEOUT 1000
 
-// hardware pin values
-#define BT_MC_RX 34
-#define BT_MC_TX 35
-#define VOLT_PIN 18
-#define CURRENT_PIN 17
-#define LED_PIN 13 // Built-in Teensy LED
+
 
 
 // sensor baud rates
