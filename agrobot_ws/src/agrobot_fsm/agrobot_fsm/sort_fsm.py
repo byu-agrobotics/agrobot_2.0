@@ -195,6 +195,17 @@ class SortFSM(Node):
         self.flip_timer.cancel()
         self.flip_timer = None
 
+
+    def turn_off_conveyor(self):
+        count = 0
+        conveyor_msg = Bool()
+
+        while count < 10:
+            conveyor_msg.data = False
+            self.conveyor_pub.publish(conveyor_msg)
+            count += 1
+
+
     # def identify_egg(self):
     #     request = IdentifyEgg.Request()
 
@@ -295,9 +306,7 @@ class SortFSM(Node):
         self.conveyor_pub.publish(conveyor_msg)
 
         if self.egg_detected:
-            conveyor_msg.data = False
-            self.conveyor_pub.publish(conveyor_msg)
-            time.sleep(1.0)
+            self.turn_off_conveyor()
             self.state = State.READ_EGG
 
         
