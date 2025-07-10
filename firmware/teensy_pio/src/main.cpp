@@ -32,6 +32,8 @@
 #include <FastLED.h>
 #include <Servo.h>
 #include "agrobot_interfaces/msg/servo_command.h"
+#include "std_msgs/msg/bool.h"
+#include <stdbool.h>
 // #include <frost_interfaces/msg/u_command.h>
 
 #define ENABLE_ACTUATORS
@@ -47,6 +49,7 @@
 
 #define ENABLE_STEPPER_1
 #define ENABLE_SERVOS
+#define ENABLE_CONVEYOR
 
 #define EN1       2                   // EN pin for left TMF8801
 #define EN2       3                   // EN pin for right TMF8801
@@ -74,6 +77,12 @@
 
 #endif // ENABLE_SERVOS
 
+#ifdef ENABLE_CONVEYOR
+  // TODO: Add motor driver capabilites here
+#endif //ENABLE_CONVEYOR
+
+
+
 #define EXECUTE_EVERY_N_MS(MS, X)                                             \
   do {                                                                        \
     static volatile int64_t init = -1;                                        \
@@ -88,7 +97,7 @@
 
 // micro-ROS config values
 #define BAUD_RATE 6000000
-#define CALLBACK_TOTAL 6
+#define CALLBACK_TOTAL 7
 #define SYNC_TIMEOUT 1000
 
 // hardware pin values
@@ -123,9 +132,9 @@ rcl_allocator_t allocator;
 rcl_node_t node;
 rclc_executor_t executor; // Added executor declaration
 
-// Egg detection publisher
-rcl_publisher_t egg_publisher;
-std_msgs__msg__Bool egg_msg;
+
+// Subscriber and publisher set up 
+
 
 // Stepper motor ROS objects
 #ifdef ENABLE_STEPPER_1
@@ -137,6 +146,7 @@ std_msgs__msg__Bool egg_msg;
   volatile float motor_position = 0.0; // In revolutions
 #endif
 
+// LED subscriber
 #ifdef ENABLE_LED
   rcl_subscription_t LED_sub;
   std_msgs__msg__Int8 LED_msg;
@@ -144,6 +154,8 @@ std_msgs__msg__Bool egg_msg;
   CRGB leds[NUM_LEDS];
 #endif  // ENABLE_LED
 
+
+// Servo subscriber
 #ifdef ENABLE_SERVOS
   agrobot_interfaces__msg__ServoCommand servo_msg;
   rcl_subscription_t servo_sub;
@@ -155,6 +167,13 @@ std_msgs__msg__Bool egg_msg;
   Servo myServo4; // sorting servo
 
 #endif // ENABLE_SERVOS
+
+// Conveyor subscriber
+#ifdef ENABLE_CONVEYOR
+  std_msgs__msg__Bool conveyor_msg;
+  rcl_subscription_t conveyor_sub;
+
+#endif // ENABLE_CONVEYOR
 
 // publisher objects
 // BatteryPub battery_pub;
@@ -216,9 +235,7 @@ void servo_sub_callback(const void *servo_msgin) {
   myServo3.write(servo_msg->servo3);
   myServo4.write(servo_msg->servo4);
 #endif
-
 }
-
 #endif //ENABLES_SERVOS
 
 
@@ -242,14 +259,31 @@ void LED_sub_callback(const void *LED_msgin) {
   else {
     color = CRGB::Black;
   }
-
-
   fill_solid(leds, NUM_LEDS, color);
   FastLED.show();
   delay(100);  // update rate
 }
-#endif
+#endif  // ENABLE_LED
 
+
+#ifdef ENABLE_CONVEYOR
+void conveyor_sub_callback(const void *conveyor_msgin) {
+  CRGB color;
+  last_received = millis();
+
+  const std_msgs__msg__Bool *conveyor_msg =
+      (const std_msgs__msg__Bool*)conveyor_msgin;
+  if (conveyor_msg->data == true) {
+    color = CRGB::Green;
+  } 
+  else{
+    color = CRGB::Black;
+  }
+  fill_solid(leds, NUM_LEDS, color);
+  FastLED.show();
+  delay(100);  // update rate
+}
+#endif // ENBLE_CONVEYOR
 
 
 
@@ -352,6 +386,16 @@ bool create_entities() {
   RCCHECK(rclc_executor_add_subscription(&executor, &servo_sub, &servo_msg, &servo_sub_callback, ON_NEW_DATA));
 
 #endif // ENABLE_SERVOS
+
+#ifdef ENABLE_CONVEYOR
+  RCCHECK(rclc_subscription_init_default(
+      &conveyor_sub,
+      &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+      "/conveyor"));
+
+  RCCHECK(rclc_executor_add_subscription(&executor, &conveyor_sub, &conveyor_msg, &conveyor_sub_callback, ON_NEW_DATA));
+#endif //ENBLE_CONVEYOR
 
 #ifdef ENABLE_BT_DEBUG
   BTSerial.println("[INFO] Micro-ROS entities created successfully");
