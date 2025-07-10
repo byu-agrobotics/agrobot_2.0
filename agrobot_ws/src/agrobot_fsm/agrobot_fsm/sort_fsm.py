@@ -10,7 +10,6 @@ import rclpy
 # import tf2_geometry_msgs
 # import tf2_ros
 import time
-import asyncio
 # import utm
 # from action_msgs.msg import GoalStatus
 # from aruco_opencv_msgs.msg import ArucoDetection
@@ -286,30 +285,18 @@ class SortFSM(Node):
 
 
     def handle_init(self):
-        """
-        Function to handle the initialization state
-        initializes the conveyor belt, turns on the camera
-        """
         if not self.init_logged:
             self.get_logger().info("Starting conveyor belt and combine")
             self.init_logged = True
                 
-        # Start combine belt
-        # combine_msg = Bool()
-        # combine_msg.data = True
-        # self.combine_pub.publish(combine_msg)
-
-        # Start conveyor belt
         conveyor_msg = Bool()
         conveyor_msg.data = True
         self.conveyor_pub.publish(conveyor_msg)
 
-        # wait until an egg is detected
         if self.egg_detected:
-            # pause conveyor belt
             conveyor_msg.data = False
             self.conveyor_pub.publish(conveyor_msg)
-            await asyncio.sleep(1.0)   # wait 1 second async
+            time.sleep(1.0)
             self.state = State.READ_EGG
 
         
