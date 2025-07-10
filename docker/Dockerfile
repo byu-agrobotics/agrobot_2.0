@@ -175,6 +175,25 @@ RUN apt update && apt install -y \
     v4l-utils
 USER $NAME
 
+#adding on to this because apparently my opencv doesn't work and these are backend processes
+# Install GTK, OpenGL, and X11 libraries needed for GUI apps (cv2.imshow, etc.) - ChatGPT, Jul 2025
+USER root
+RUN apt update && apt install -y \
+    libgtk2.0-dev \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libx11-xcb1 \
+    libxrender1 \
+    libxext6 \
+    libxfixes3 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxi6 \
+    libxtst6 \
+    x11-apps
+USER $NAME
+
 # Install the serial and pyserial libraries - Nelson Durrant, May 2025
 # Used by the roboclaw library for serial communication
 
