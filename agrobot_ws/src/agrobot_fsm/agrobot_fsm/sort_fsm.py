@@ -228,7 +228,7 @@ class SortFSM(Node):
 
     def eggdetect_callback(self, msg):
         self.egg_detected = msg.data
-        self.get_logger().info(f'Received message: "{msg.data}"')
+        self.get_logger().info(f'Eggdetect received message: "{msg.data}"')
 
 
     def send_identifyegg_req(self):

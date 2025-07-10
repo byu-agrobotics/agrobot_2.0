@@ -852,13 +852,12 @@ void loop() {
     });
 #endif
 
-#ifdef ENABLE_EGGDETECT
-    EXECUTE_EVERY_N_MS(100, {
-          egg_msg.data = true;
-          RCSOFTCHECK(rcl_publish(&eggdetect_pub, &egg_msg, NULL));
-      });
-
-#endif //ENABLE_EGGDETECT
+// #ifdef ENABLE_EGGDETECT
+//     EXECUTE_EVERY_N_MS(100, {
+//           egg_msg.data = true;
+//           RCSOFTCHECK(rcl_publish(&eggdetect_pub, &egg_msg, NULL));
+//       });
+// #endif //ENABLE_EGGDETECT
 
 #ifdef ENABLE_TOF_SENSORS
       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());
