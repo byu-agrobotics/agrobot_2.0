@@ -51,6 +51,7 @@
 #define ENABLE_SERVOS
 #define ENABLE_CONVEYOR
 #define ENABLE_FEEDER
+#define ENABLE_EGGDETECT
 
 #define EN1       2                   // EN pin for left TMF8801
 #define EN2       3                   // EN pin for right TMF8801
@@ -98,7 +99,7 @@
 
 // micro-ROS config values
 #define BAUD_RATE 6000000
-#define CALLBACK_TOTAL 8
+#define CALLBACK_TOTAL 9
 #define SYNC_TIMEOUT 1000
 
 // hardware pin values
@@ -181,6 +182,13 @@ rclc_executor_t executor; // Added executor declaration
   std_msgs__msg__Bool feeder_msg;
   rcl_subscription_t feeder_sub;
 #endif // ENABLE_FEEDER
+
+// Egg_detect publisher
+#ifdef ENABLE_EGGDETECT
+  rcl_publisher_t eggdetect_pub;
+  std_msgs__msg__Bool egg_msg;
+#endif // ENABLE_EGGDETECT
+
 
 // publisher objects
 // BatteryPub battery_pub;
@@ -432,6 +440,15 @@ bool create_entities() {
 
   RCCHECK(rclc_executor_add_subscription(&executor, &feeder_sub, &feeder_msg, &feeder_sub_callback, ON_NEW_DATA));
 #endif //ENBLE_CONVEYOR
+
+#ifdef ENABLE_EGGDETECT
+  RCCHECK(rclc_publisher_init_default(
+    &eggdetect_pub,
+    &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+    "/egg_detect"));
+
+#endif //ENABLE_EGGDETECT
 
 #ifdef ENABLE_BT_DEBUG
   BTSerial.println("[INFO] Micro-ROS entities created successfully");
@@ -835,11 +852,13 @@ void loop() {
     });
 #endif
 
-#ifdef ENABLE_HBRIDGE
-      // Continuously spin the second H-bridge motor slowly
-      digitalWrite(HBRIDGE_IN3, HIGH);
-      digitalWrite(HBRIDGE_IN4, LOW);
-#endif // ENABLE_HBRIDGE
+#ifdef ENABLE_EGGDETECT
+    EXECUTE_EVERY_N_MS(100, {
+          egg_mssg.data = true;
+          RCSOFTCHECK(rcl_publish(&eggdetect_pub, &egg_msg, NULL));
+      });
+
+#endif //ENABLE_EGGDETECT
 
 #ifdef ENABLE_TOF_SENSORS
       EXECUTE_EVERY_N_MS(TOF_MS, read_tof_sensor());
