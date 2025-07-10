@@ -109,6 +109,7 @@ class SortFSM(Node):
         self.servo_msg = ServoCommand()
         self.flip_timer = None
         self.egg_detected = False
+        self.prev_state = None
 
         print("Setting up")
         # Create a timer to call `state_loop` every 0.1 seconds (10 Hz)
