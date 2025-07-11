@@ -89,6 +89,7 @@
 
 #ifdef ENABLE_CONVEYOR
   // TODO: Add motor driver capabilites here
+  const int conveyor_speed = 200;
 #endif //ENABLE_CONVEYOR
 
 
@@ -298,7 +299,7 @@ void conveyor_sub_callback(const void *conveyor_msgin) {
       (const std_msgs__msg__Bool*)conveyor_msgin;
 
   if (conveyor_msg->data && !motor_is_on) {
-    analogWrite(DC_IN3, 100);  // Full speed forward
+    analogWrite(DC_IN3, conveyor_speed);  // Full speed forward
     motor_is_on = true;
     color = CRGB::Green;
   }
