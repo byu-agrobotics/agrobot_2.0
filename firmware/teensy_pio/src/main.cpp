@@ -44,7 +44,7 @@
 // #define ENABLE_LED_MATRIX
 
 #define ENABLE_STEPPER_1
-#define pinIRd 25 // IR sensor pin
+#define pinIRd 8 // IR sensor pin
 // TOF enable pins
 #define EN1       2                   // EN pin for left TMF8801
 #define EN2       3                   // EN pin for right TMF8801
