@@ -535,8 +535,8 @@ void setup() {
 #endif
 
 #ifdef ENABLE_DCMOTOR
-  pinMode(IN1, OUTPUT);
-  pinMode(IN3, OUTPUT);
+  // pinMode(DC_IN1, OUTPUT);
+  pinMode(DC_IN3, OUTPUT);
 #endif // ENABLE_DCMOTOR
 
 #ifdef ENABLE_TOF_SENSORS // TODO: Add ifdefs for BTSerial below
