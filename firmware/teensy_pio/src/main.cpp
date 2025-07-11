@@ -76,6 +76,7 @@
 
 #ifdef ENABLE_DCMOTOR
   // #define DC_IN1 20
+  bool motor_is_on = false;
   #define DC_IN3 33
 
 #endif // ENABLE_DCMOTOR
@@ -295,18 +296,32 @@ void conveyor_sub_callback(const void *conveyor_msgin) {
 
   const std_msgs__msg__Bool *conveyor_msg =
       (const std_msgs__msg__Bool*)conveyor_msgin;
-  if (conveyor_msg->data == true) {
+
+  if (msg.data && !motor_is_on) {
+    analogWrite(DC_IN3, 255);  // Full speed forward
+    motor_is_on = true;
     color = CRGB::Green;
-    // analogWrite(DC_IN1, 200);  // Speed for motor A (0–255)
-    // analogWrite(DC_IN3, 200);  // Speed for motor B
-    digitalWrite(DC_IN3, HIGH);
-  } 
-  else{
-    color = CRGB::Black;
-    // analogWrite(DC_IN1, 0);  // turn off motor
-    // analogWrite(DC_IN3, 0);  // turn off motor
-    digitalWrite(DC_IN3, LOW);
   }
+
+  if (!msg.data && motor_is_on) {
+    analogWrite(DC_IN3, 0);  // Stop motor
+    motor_is_on = false;
+    color = CRGB::Black;
+  }
+
+
+  // if (conveyor_msg->data == true) {
+  //   color = CRGB::Green;
+  //   // analogWrite(DC_IN1, 200);  // Speed for motor A (0–255)
+  //   // analogWrite(DC_IN3, 200);  // Speed for motor B
+  //   digitalWrite(DC_IN3, HIGH);
+  // } 
+  // else{
+  //   color = CRGB::Black;
+  //   // analogWrite(DC_IN1, 0);  // turn off motor
+  //   // analogWrite(DC_IN3, 0);  // turn off motor
+  //   digitalWrite(DC_IN3, LOW);
+  // }
   fill_solid(leds, NUM_LEDS, color);
   FastLED.show();
   delay(100);  // update rate
