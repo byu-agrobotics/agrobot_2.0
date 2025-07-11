@@ -76,7 +76,7 @@
 
 #ifdef ENABLE_DCMOTOR
   // #define DC_IN1 20
-  #define DC_IN3 41
+  #define DC_IN3 33
 
 #endif // ENABLE_DCMOTOR
 
@@ -298,12 +298,14 @@ void conveyor_sub_callback(const void *conveyor_msgin) {
   if (conveyor_msg->data == true) {
     color = CRGB::Green;
     // analogWrite(DC_IN1, 200);  // Speed for motor A (0–255)
-    analogWrite(DC_IN3, 100);  // Speed for motor B
+    // analogWrite(DC_IN3, 200);  // Speed for motor B
+    digitalWrite(IN3, HIGH);
   } 
   else{
     color = CRGB::Black;
     // analogWrite(DC_IN1, 0);  // turn off motor
-    analogWrite(DC_IN3, 100);  // turn off motor
+    // analogWrite(DC_IN3, 0);  // turn off motor
+    digitalWrite(IN3, LOW);
   }
   fill_solid(leds, NUM_LEDS, color);
   FastLED.show();
