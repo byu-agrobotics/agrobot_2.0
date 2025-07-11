@@ -299,13 +299,13 @@ void conveyor_sub_callback(const void *conveyor_msgin) {
     color = CRGB::Green;
     // analogWrite(DC_IN1, 200);  // Speed for motor A (0–255)
     // analogWrite(DC_IN3, 200);  // Speed for motor B
-    digitalWrite(IN3, HIGH);
+    digitalWrite(DC_IN3, HIGH);
   } 
   else{
     color = CRGB::Black;
     // analogWrite(DC_IN1, 0);  // turn off motor
     // analogWrite(DC_IN3, 0);  // turn off motor
-    digitalWrite(IN3, LOW);
+    digitalWrite(DC_IN3, LOW);
   }
   fill_solid(leds, NUM_LEDS, color);
   FastLED.show();
