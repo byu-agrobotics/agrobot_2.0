@@ -277,28 +277,46 @@ void servo_sub_callback(const void *servo_msgin) {
 
 #ifdef ENABLE_LED
 void LED_sub_callback(const void *LED_msgin) {
-  CRGB color;
-  last_received = millis();
+  static int current_mode = -1;
+  static bool led_on = false;
+  static unsigned long last_toggle_time = 0;
 
   const std_msgs__msg__Int8 *LED_msg =
       (const std_msgs__msg__Int8*)LED_msgin;
-  if (LED_msg->data == 1) {
+  int new_mode = LED_msg->data;
+  unsigned long now = millis();
+
+  // Only update mode if it changed
+  if (new_mode != current_mode) {
+    current_mode = new_mode;
+    last_toggle_time = now;
+    led_on = false;  // Reset blink state
+  }
+
+  CRGB color = CRGB::Black;
+
+  if (current_mode == 1) {
     color = CRGB::Green;
-  } 
-  else if (LED_msg->data == 2) {
+  } else if (current_mode == 2) {
     color = CRGB::Blue;
-  }
-  else if (LED_msg->data == 3) {
+  } else if (current_mode == 3) {
     color = CRGB::Red;
-  }
-  else {
+  } else if (current_mode == 4) {
+    // Blink green every 500ms
+    if (now - last_toggle_time >= 500) {
+      last_toggle_time = now;
+      led_on = !led_on;
+    }
+    color = led_on ? CRGB::Green : CRGB::Black;
+  } else {
     color = CRGB::Black;
   }
+
   fill_solid(leds, NUM_LEDS, color);
   FastLED.show();
-  delay(100);  // update rate
 }
 #endif  // ENABLE_LED
+
 
 
 #ifdef ENABLE_CONVEYOR
