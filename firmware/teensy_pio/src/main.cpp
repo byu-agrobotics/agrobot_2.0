@@ -73,19 +73,18 @@
   #define SERVO_PIN4 23
   // default servo positions
   #define DEFAULT_SERVO 90
+  // servo conversion values
+  #define SERVO_OUT_HIGH 2500
+  #define SERVO_OUT_LOW 500
+#endif // ENABLE_SERVOS
+
 
 #ifdef ENABLE_DCMOTOR
   // #define DC_IN1 20
   bool motor_is_on = false;
   #define DC_IN3 33
-
 #endif // ENABLE_DCMOTOR
 
-  // servo conversion values
-  #define SERVO_OUT_HIGH 2500
-  #define SERVO_OUT_LOW 500
-
-#endif // ENABLE_SERVOS
 
 #ifdef ENABLE_CONVEYOR
   // TODO: Add motor driver capabilites here
@@ -247,18 +246,30 @@ void blink_led(int count, int duration_ms) {
 
 #ifdef ENABLE_SERVOS
 void servo_sub_callback(const void *servo_msgin) {
-
+  CRGB color;
   last_received = millis();
 
   const agrobot_interfaces__msg__ServoCommand *servo_msg =
       (const agrobot_interfaces__msg__ServoCommand *)servo_msgin;
 
-#ifdef ENABLE_SERVOS
   myServo1.write(servo_msg->servo1);
   myServo2.write(servo_msg->servo2);
   myServo3.write(servo_msg->servo3);
   myServo4.write(servo_msg->servo4);
-#endif
+
+  if (servo_msg->servo4 == 90){
+    color = CRGB::Green;
+  }
+  if (servo_msg->servo4 == 180){
+    color = CRGB::Blue;
+  }
+  if (servo_msg->servo4 == 0){
+    color = CRGB::Black;
+  }
+
+  fill_solid(leds, NUM_LEDS, color);
+    FastLED.show();
+    delay(100);  // update rate
 }
 #endif //ENABLES_SERVOS
 
