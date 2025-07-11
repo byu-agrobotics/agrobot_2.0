@@ -298,7 +298,7 @@ void conveyor_sub_callback(const void *conveyor_msgin) {
       (const std_msgs__msg__Bool*)conveyor_msgin;
 
   if (conveyor_msg->data && !motor_is_on) {
-    analogWrite(DC_IN3, 255);  // Full speed forward
+    analogWrite(DC_IN3, 100);  // Full speed forward
     motor_is_on = true;
     color = CRGB::Green;
   }
