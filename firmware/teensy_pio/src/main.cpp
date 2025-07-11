@@ -75,8 +75,8 @@
   #define DEFAULT_SERVO 90
 
 #ifdef ENABLE_DCMOTOR
-  #define DC_IN1 20
-  #define DC_IN3 21
+  // #define DC_IN1 20
+  #define DC_IN3 41
 
 #endif // ENABLE_DCMOTOR
 
@@ -297,13 +297,13 @@ void conveyor_sub_callback(const void *conveyor_msgin) {
       (const std_msgs__msg__Bool*)conveyor_msgin;
   if (conveyor_msg->data == true) {
     color = CRGB::Green;
-    analogWrite(IN1, 200);  // Speed for motor A (0–255)
-    analogWrite(IN3, 100);  // Speed for motor B
+    // analogWrite(DC_IN1, 200);  // Speed for motor A (0–255)
+    analogWrite(DC_IN3, 100);  // Speed for motor B
   } 
   else{
     color = CRGB::Black;
-    analogWrite(IN1, 0);  // turn off motor
-    analogWrite(IN3, 100);  // turn off motor
+    // analogWrite(DC_IN1, 0);  // turn off motor
+    analogWrite(DC_IN3, 100);  // turn off motor
   }
   fill_solid(leds, NUM_LEDS, color);
   FastLED.show();
