@@ -1,13 +1,14 @@
 import asyncio
 import rclpy
 import time
+import traceback
 from enum import Enum, auto
 from rclpy.action import ActionServer, ActionClient, CancelResponse
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.task import Future
-from agrobot_interfaces.action import GenericTask, DriveStraight, DriveControl
+from agrobot_interfaces.action import GenericTask, DriveStraight, DriveControl, Center
 from agrobot_interfaces.srv import IdentifyEgg
 from agrobot_interfaces.msg import ToFData
 from threading import RLock
@@ -90,7 +91,7 @@ class NavigateFSM(Node):
         # Action client to center robot
         self.center_client = PatchRclpyIssue1123(
             self, 
-            DriveControl, 
+            Center, 
             "control/center", 
             callback_group=nested_action_callback_group,
         )
@@ -111,8 +112,9 @@ class NavigateFSM(Node):
         self.task_goal_handle = None
         self.goal_handle = None
         self.result_future = None
-        self.feedback = None
-        self.drivecontrol_result = None
+        #self.feedback = None
+        self.drive_center_result = None
+        #self.drivecontrol_feedback_callback = None
 
         #####################################
         ### END ROS 2 OBJECT DECLARATIONS ###
@@ -128,23 +130,23 @@ class NavigateFSM(Node):
         """
         NOTE: Call this with the asyncio.run() function
         """
-        self.get_logger().debug("Waiting for 'DriveControl' action server")
+        self.get_logger().debug("Waiting for 'Center' action server")
         while not self.center_client.wait_for_server(timeout_sec=1.0):
-            self.get_logger().info("'DriveControl' action server not available, waiting...")
-        goal_msg = DriveControl.Goal()
+            self.get_logger().info("'Center' action server not available, waiting...")
+        goal_msg = Center.Goal()
         send_goal_future = self.center_client.send_goal_async(
-            goal_msg, self._feedbackCallback
+            goal_msg
         )
         await send_goal_future  # fix for iron/humble threading bug
         self.goal_handle = send_goal_future.result()
         if not self.goal_handle.accepted:
-            self.get_logger().error("DriveControl request was rejected!")
+            self.get_logger().error("Center request was rejected!")
             return False
         self.result_future = self.goal_handle.get_result_async()
         await self.result_future
 
-        self.drivecontrol_result = self.result_future.result().result
-        self.get_logger().info(f"DriveControl result received: success = {self.drivecontrol_result.success}")
+        self.drive_center_result = self.result_future.result().result
+        self.get_logger().info(f"Center result received: success = {self.drive_center_result.success}")
 
         return True
 
@@ -192,10 +194,10 @@ class NavigateFSM(Node):
         await self.result_future
 
     def _feedbackCallback(self, msg):
-        self.feedback = msg.feedback
-        self.get_logger().debug(f"DriveControl Feedback — forward_error={self.feedback.forward_error}, "
-        f"lateral_error={self.feedback.lateral_error}, stability={self.feedback.stability_count}"
-        )
+        #self.feedback = msg.feedback
+        #self.get_logger().debug(f"DriveControl Feedback — forward_error={self.feedback.forward_error}, "
+        #f"lateral_error={self.feedback.lateral_error}, stability={self.feedback.stability_count}"
+        #)
         return
 
     #######################################
@@ -366,7 +368,12 @@ class NavigateFSM(Node):
 
         # Quick examples of how to use actions and services in the state machine
         self.task_info("Requesting drive control action")
-        response = asyncio.run(self.send_drive_to_center_goal())
+        try:
+            response = asyncio.run(self.send_drive_to_center_goal())
+            self.task_info("Received response from drive control action")
+        except Exception as e:
+            error_message = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+            self.task_fatal(f"Exception during DriveControl goal:\n{error_message}")
         while not asyncio.run(self.isTaskComplete()):
             time.sleep(0.1)
             self.task_info("In isTaskComplete loop")
@@ -374,7 +381,7 @@ class NavigateFSM(Node):
                 asyncio.run(self.cancelTask())
                 raise Exception("Task execution canceled by action client")
 
-        if response and self.drivecontrol_result.success:
+        if response and self.drive_center_result.success:
             self.task_success("Robot is centered.")
             self.complete_flag = True
         else:

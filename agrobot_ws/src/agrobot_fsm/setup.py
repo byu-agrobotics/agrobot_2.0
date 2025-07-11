@@ -24,7 +24,9 @@ setup(
     entry_points={
         'console_scripts': [
             'collect_fsm = agrobot_fsm.collect_fsm:main',
-            'navigate_fsm = agrobot_fsm.navigate_fsm:main'
+            'navigate_fsm = agrobot_fsm.navigate_fsm:main',
+            'handle_fsm = agrobot_fsm.handle_fsm:main',
+            'sort_fsm = agrobot_fsm.sort_fsm:main'
         ],
     },
 )

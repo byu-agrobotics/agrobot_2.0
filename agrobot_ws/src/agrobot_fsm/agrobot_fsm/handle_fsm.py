@@ -16,7 +16,10 @@ from typing import Any
 
 class State(Enum):
     INIT = auto()
-    CENTER_ROBOT = auto()
+    TURN_LEFT = auto()
+    TURN_RIGHT = auto()
+    DRIVE_STRAIGHT = auto()
+    DISPENSE = auto()
 
 class PatchRclpyIssue1123(ActionClient):
     """
@@ -130,7 +133,8 @@ class HandleFSM(Node):
         self.result_future = None
         self.feedback = None
         self.last_tof_data = None
-        self.drivecontrol_result = None
+        self.drive_result = None
+        self.beginning_flag = True
 
         #####################################
         ### END ROS 2 OBJECT DECLARATIONS ###
@@ -142,7 +146,7 @@ class HandleFSM(Node):
     ### NESTED ACTION HANDLING CODE ###
     ###################################
 
-    async def send_drive_to_center_goal(self):
+    async def send_turn_left_goal(self):
         """
         NOTE: Call this with the asyncio.run() function
         """
@@ -166,7 +170,7 @@ class HandleFSM(Node):
 
         return True
 
-    async def drive_straight(self, front_distance):
+    async def send_drive_straight_goal(self, front_distance):
         """
         Function to drive straight, based on the nav2_simple_commander code
         NOTE: Call this with the asyncio.run() function
@@ -389,8 +393,14 @@ class HandleFSM(Node):
             match self.state:
                 case State.INIT:
                     self.handle_init()
-                case State.CENTER_ROBOT:
-                    self.center_robot()
+                case State.TURN_LEFT:
+                    self.turn_left()
+                case State.TURN_RIGHT:
+                    self.turn_right()
+                case State.DRIVE_STRAIGHT():
+                    self.drive_straight()
+                case State.DISPENSE:
+                    self.dispense()
                 case _:
                     raise Exception("Invalid state: " + str(self.state))
 
@@ -405,12 +415,12 @@ class HandleFSM(Node):
 
         self.state = State.CENTER_ROBOT
 
-    def center_robot(self):
-        self.task_info("Centering Robot")
+    def turn_left(self):
+        self.task_info("Turning Robot LEFT <------")
 
         # Quick examples of how to use actions and services in the state machine
-        self.task_info("Requesting drive control action")
-        response = asyncio.run(self.send_drive_to_center_goal())
+        self.task_info("Requesting turn left action")
+        response = asyncio.run(self.send_turn_left_goal())
         while not asyncio.run(self.isTaskComplete()):
             time.sleep(0.1)
             self.task_info("In isTaskComplete loop")
