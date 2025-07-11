@@ -502,16 +502,16 @@ void setup() {
  * Reads the battery sensor data. This function reads the battery sensor
  * data (voltage and current) and publishes it to the micro-ROS agent.
  */
-void read_battery() {
-  blink_led(1, 30);
-  // we did some testing to determine the below params, but
-  // it's possible they are not completely accurate
-  float voltage = (analogRead(VOLT_PIN) * 0.03437) + 0.68;
-  float current = (analogRead(CURRENT_PIN) * 0.122) - 11.95;
+// void read_battery() {
+//   blink_led(1, 30);
+//   // we did some testing to determine the below params, but
+//   // it's possible they are not completely accurate
+//   float voltage = (analogRead(VOLT_PIN) * 0.03437) + 0.68;
+//   float current = (analogRead(CURRENT_PIN) * 0.122) - 11.95;
 
-  // publish the battery data
-  // battery_pub.publish(voltage, current);
-}
+//   // publish the battery data
+//   // battery_pub.publish(voltage, current);
+// }
 
 #ifdef ENABLE_IR_SENSOR
 void read_ir_sensor() {
