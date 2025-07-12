@@ -90,14 +90,15 @@ class SortFSM(Node):
         # publishers
         self.LED_pub = self.create_publisher(Int8, "/LED", 10)
         self.servo_pub = self.create_publisher(ServoCommand, "/servo", 10)
-        # self.combine_pub = self.create_publisher(Bool, '/combine', 10)
+        self.combine_pub = self.create_publisher(Bool, '/combine', 10)
         self.conveyor_pub = self.create_publisher(Bool, '/conveyor', 10)
         self.feeder_pub = self.create_publisher(Bool, '/feeder', 10)
-        # self.carriage_pub = self.create_publisher(Bool, '/carriage', 10)
+        self.carriage_pub = self.create_publisher(Bool, '/carriage', 10)
         
 
         # subscribers
         self.eggdetect_sub = self.create_subscription(Bool, '/egg_detect', self.eggdetect_callback, 10)
+        self.carriag_pos_sub = self.create_subscription(Float32, '/stepper_position', self.carriage_pos_callback, 10)
         # self.stepper_position
         # self.feeder_position
 
@@ -195,15 +196,53 @@ class SortFSM(Node):
         self.flip_timer = None
 
 
+    # def turn_off_conveyor(self):
+    #     count = 0
+    #     conveyor_msg = Bool()
+
+    #     while count < 50:
+    #         conveyor_msg.data = False
+    #         self.conveyor_pub.publish(conveyor_msg)
+    #         count += 1
+
     def turn_off_conveyor(self):
-        count = 0
         conveyor_msg = Bool()
+        conveyor_msg.data = False
 
-        while count < 50:
-            conveyor_msg.data = False
-            self.conveyor_pub.publish(conveyor_msg)
-            count += 1
+        # Publish once, give time for Teensy to receive and act
+        self.conveyor_pub.publish(conveyor_msg)
+        rclpy.spin_once(self, timeout_sec=0.01)
+        time.sleep(0.1)  # 100 ms delay to ensure it's received
 
+    # def feed_egg(self):
+    #     count1 = 0
+    #     count2 = 0
+    #     feeder_msg = Bool()
+
+    #     while count1 < 50:
+    #         feeder_msg.data = True
+    #         self.feeder_pub.publish(feeder_msg)
+    #         count1 += 1
+        
+    #     while count2 < 50:
+    #         feeder_msg.data = False
+    #         self.feeder_pub.publish(feeder_msg)
+    #         count2 += 1
+
+
+    def feed_egg(self):
+        feeder_msg = Bool()
+
+        # Send 'True' once (rising edge), then keep it for a short duration
+        feeder_msg.data = True
+        self.feeder_pub.publish(feeder_msg)
+        rclpy.spin_once(self, timeout_sec=0.01)
+        time.sleep(0.1)  # 100 ms pulse
+
+        # Then send 'False' to reset (falling edge)
+        feeder_msg.data = False
+        self.feeder_pub.publish(feeder_msg)
+        rclpy.spin_once(self, timeout_sec=0.01)
 
     # def identify_egg(self):
     #     request = IdentifyEgg.Request()
@@ -242,6 +281,10 @@ class SortFSM(Node):
     def eggdetect_callback(self, msg):
         self.egg_detected = msg.data
         # self.get_logger().info(f'Eggdetect received message: "{msg.data}"')
+
+
+    def carriage_pos_callback(self,msg):
+        self.carriage_pos = msg.data
 
 
     # def send_identifyegg_req(self):
@@ -316,32 +359,33 @@ class SortFSM(Node):
         if not self.init_logged:
             self.get_logger().info("Starting conveyor belt and combine")
             self.init_logged = True
-                
+
+        # start conveyor belt
         conveyor_msg = Bool()
         conveyor_msg.data = True
         self.conveyor_pub.publish(conveyor_msg)
 
+        # start combine
+        combine_msg = Bool()
+        combine_msg.data = True
+        self.combine_pub.publish(combine_msg)
+
+        # wait until IR detects an egg in the slot
         if self.egg_detected:
+            # turn off conveyor belt
             self.turn_off_conveyor()
             self.init_logged = False
+            # feed egg to camera detection spot
+            self.feed_egg()
             self.state = State.READ_EGG
 
-        
-        # egg_type = self.identify_egg()
-        # if egg_type == 0:
-        #     # this means it is empty, and egg needs to be loaded into the camera area
-        #     # TODO: ned to make it such that if the egg isn't detected properly, but the area is there that it returns
-        #     # something before another egg gets kicked into the box
-        #     pass
-        # else:
-        #     self.state = State.READ_EGG
-
-        # self.state = State.RED_EGG
 
     def handle_read_egg(self):
         """
         Function to handle reading the egg using the camera        
         """
+
+        # send request for camera to identify egg
         if not self.init_logged:
             self.get_logger().info("Sending identifyegg request")
             self.init_logged = True
@@ -350,26 +394,17 @@ class SortFSM(Node):
             future = self.identifyegg.call_async(req)
             future.add_done_callback(self.handle_egg_response)
         
-        # egg_type = "Large"
-        # egg_type = self.identify_egg()
-        # self.moving_egg = egg_type
-        # self.state = State.MOVE_EGG
+        
 
     def handle_move_egg(self):
         """
         Function to move the egg to the right bin position
         """
-        # feed the egg into the carriage
-        feeder_msg = Bool()
-        feeder_msg.data = True
-        self.feeder_pub.publish(feeder_msg)
 
-        # TODO: wait either on a timer OR wait on the hall effect sensor
-
-        # # move the carriage
-        # carriage_msg = Bool()
-        # carriage_msg.data = True
-        # self.carriage_pub.publish(carriage_msg)
+        # move the carriage
+        carriage_msg = Bool()
+        carriage_msg.data = True
+        self.carriage_pub.publish(carriage_msg)
 
         # if self.moving_egg == 1:
         #     # move linear actuator to position 1
