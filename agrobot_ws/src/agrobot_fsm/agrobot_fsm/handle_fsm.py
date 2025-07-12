@@ -19,6 +19,7 @@ class State(Enum):
     TURN_LEFT = auto()
     TURN_RIGHT = auto()
     DRIVE_STRAIGHT = auto()
+    DRIVE_BACKWARDS = auto()
     DISPENSE = auto()
 
 class PatchRclpyIssue1123(ActionClient):
@@ -83,12 +84,19 @@ class HandleFSM(Node):
         ### ROS 2 OBJECT DECLARATIONS ###
         #################################
 
-        # Callback groups (for threading)
-        norm_callback_group = MutuallyExclusiveCallbackGroup()
-        nested_action_callback_group = MutuallyExclusiveCallbackGroup()
-        action_callback_group = (
-            ReentrantCallbackGroup()
-        )  # needed to monitor cancel requests
+        # Set up publishers
+
+        # PUBlishers
+        self.LED_pub = self.create_publisher(Int8, "/LED", 10)
+        self.servo_pub = self.create_publisher(ServoCommand, "/servo", 10)
+        self.combine_pub = self.create_publisher(Bool, '/combine', 10)
+        self.conveyor_pub = self.create_publisher(Bool, '/conveyor', 10)
+        self.feeder_pub = self.create_publisher(Bool, '/feeder', 10)
+        # self.carriage_pub = self.create_publisher(Bool, '/carriage', 10)
+        
+        # SUBscribers
+        # self.stepper_position
+        # self.feeder_position
 
         # TOF subscriber
         self.tof_subscriber = self.create_subscription(
@@ -100,19 +108,41 @@ class HandleFSM(Node):
         )
         self.tof_subscriber  # prevent unused variable warning
 
-        # Action client to center robot
-        self.center_client = PatchRclpyIssue1123(
-            self, 
-            DriveControl, 
-            "control/center", 
-            callback_group=nested_action_callback_group,
-        )
+        print("Setting up")
+        # Create a timer to call `state_loop` every 0.1 seconds (10 Hz)
+        self.state = State.INIT
+
+        self.create_timer(.1, self.run_sort_sm)
+
+        # Callback groups (for threading)
+        norm_callback_group = MutuallyExclusiveCallbackGroup()
+        nested_action_callback_group = MutuallyExclusiveCallbackGroup()
+        action_callback_group = (
+            ReentrantCallbackGroup()
+        )  # needed to monitor cancel requests
+
+        # service clients
+        self.identifyegg = self.create_client(IdentifyEgg, "egg/identify")
 
         self.drive_straight_client = PatchRclpyIssue1123(
             self,
             DriveStraight,
             "control/drive_straight",
             callback_group=nested_action_callback_group,
+        )
+
+        self.turn_client = PatchRclpyIssue1123(
+            self,
+            DriveStraight,
+            "control/drive_straight",
+            callback_group=nested_action_callback_group,
+        )
+
+        self.turn_action_server = ActionServer(
+            self, 
+            Turn, 
+            'control/turn',
+            callback_group=nested_action_callback_group
         )
 
         # Action server to run the task executor
@@ -125,7 +155,6 @@ class HandleFSM(Node):
             cancel_callback=self.cancel_callback,
         )
 
-
         # Initialize variables
         self.name = "handle_fsm"
         self.task_goal_handle = None
@@ -134,7 +163,14 @@ class HandleFSM(Node):
         self.feedback = None
         self.last_tof_data = None
         self.drive_result = None
-        self.beginning_flag = True
+        self.egg_in_feeder = False
+        self.turn_result = False
+        self.drive_result = False
+
+        self.servo_msg = ServoCommand()
+        self.flip_timer = None
+        self.prev_state = None
+        self.init_logged = False
 
         #####################################
         ### END ROS 2 OBJECT DECLARATIONS ###
@@ -146,27 +182,57 @@ class HandleFSM(Node):
     ### NESTED ACTION HANDLING CODE ###
     ###################################
 
-    async def send_turn_left_goal(self):
+    async def send_turn_left_goal(self, degrees):
         """
         NOTE: Call this with the asyncio.run() function
         """
-        self.get_logger().debug("Waiting for 'DriveControl' action server")
+        self.get_logger().debug("Waiting for 'Turn Left' action server")
         while not self.center_client.wait_for_server(timeout_sec=1.0):
-            self.get_logger.info("'DriveControl' action server not available, waiting...")
-        goal_msg = DriveControl.Goal()
+            self.get_logger.info("'Turn Left' action server not available, waiting...")
+        goal_msg = Turn.Goal()
+        goal_msg.angle = degrees
+
+        self.get_logger().info("Turning Left until: " + str(degrees))
         send_goal_future = self.center_client.send_goal_async(
             goal_msg, self._feedbackCallback
         )
         await send_goal_future  # fix for iron/humble threading bug
         self.goal_handle = send_goal_future.result()
         if not self.goal_handle.accepted:
-            self.get_logger().error("DriveControl request was rejected!")
+            self.get_logger().error("Turn Left request was rejected!")
             return False
         self.result_future = self.goal_handle.get_result_async()
         await self.result_future
 
-        self.drivecontrol_result = self.result_future.result().result
-        self.get_logger().info(f"DriveControl result received: success = {self.drivecontrol_result.success}")
+        self.turn_result = self.result_future.result().result
+        self.get_logger().info(f"Turn Left result received: success = {self.turn_result.success}")
+
+        return True
+
+    async def send_turn_right_goal(self, degrees):
+        """
+        NOTE: Call this with the asyncio.run() function
+        """
+        self.get_logger().debug("Waiting for 'Turn Right' action server")
+        while not self.center_client.wait_for_server(timeout_sec=1.0):
+            self.get_logger.info("'Turn Right' action server not available, waiting...")
+        goal_msg = Turn.Goal()
+        goal_msg.angle = degrees
+
+        self.get_logger().info("Turning Right until: " + str(degrees))
+        send_goal_future = self.center_client.send_goal_async(
+            goal_msg, self._feedbackCallback
+        )
+        await send_goal_future  # fix for iron/humble threading bug
+        self.goal_handle = send_goal_future.result()
+        if not self.goal_handle.accepted:
+            self.get_logger().error("Turn Right request was rejected!")
+            return False
+        self.result_future = self.goal_handle.get_result_async()
+        await self.result_future
+
+        self.turn_result = self.result_future.result().result
+        self.get_logger().info(f"Turn Right result received: success = {self.turn_result.success}")
 
         return True
 
@@ -194,6 +260,11 @@ class HandleFSM(Node):
             return False
 
         self.result_future = self.goal_handle.get_result_async()
+        await self.result_future
+
+        self.drive_result = self.result_future.result().result
+        self.get_logger().info(f"Drive Straight result received: success = {self.drive_result.success}")
+        
         return True
 
     async def cancelTask(self):
@@ -313,7 +384,6 @@ class HandleFSM(Node):
         back = msg.back
         self.get_logger().info(f"I heard: Front={front}, Left={left}, Right={right}, Back={back}")
 
-
     ###################################
     ### END GENERAL ROS 2 CALLBACKS ###
     ###################################
@@ -376,6 +446,122 @@ class HandleFSM(Node):
     ### END TASK FEEDBACK FUNCTIONS ###
     ###################################
 
+    #########################
+    ### General Functions ###
+    #########################
+
+    def turn_on_combine(self):
+        count = 0
+        combine_msg = Bool()
+
+        while count < 50:
+        combine_msg.data = True
+        self.get_logger().info(f'Combine publishing message: "{combine_msg.data}"')
+        self.conveyor_pub.publish(combine_msg)
+        count += 1
+
+    def turn_off_combine(self):
+        count = 0
+        combine_msg = Bool()
+
+        while count < 50:
+            combine_msg.data = False
+            self.get_logger().info(f'Combine publishing message: "{combine_msg.data}"')
+            self.conveyor_pub.publish(combine_msg)
+            count += 1
+    
+    def turn_on_conveyor(self):
+        count = 0
+        conveyor_msg = Bool()
+
+        while count < 50:
+            conveyor_msg.data = True
+            self.get_logger().info(f'Conveyor publishing message: "{conveyor_msg.data}"')
+            self.conveyor_pub.publish(conveyor_msg)
+            count += 1
+
+    def turn_off_conveyor(self):
+        count = 0
+        conveyor_msg = Bool()
+
+        while count < 50:
+            conveyor_msg.data = False
+            self.get_logger().info(f'Conveyor publishing message: "{conveyor_msg.data}"')
+            self.conveyor_pub.publish(conveyor_msg)
+            count += 1
+
+    def LED_alert(self, egg):
+        led_msg = Int8()
+        count = 0
+
+        while count < 50:
+            led_msg.data = egg
+            self.get_logger().info(f'LED publishing message: "{led_msg.data}"')
+            self.LED_pub.publish(led_msg)
+            count += 1
+
+    def move_servo(self):
+        return
+
+    def move_feeder_one_position(self):
+        return
+
+    def OpenBin(self, egg):
+        # Set all servos to 90 (neutral)
+        self.servo_msg.servo1 = 90
+        self.servo_msg.servo2 = 90
+        self.servo_msg.servo3 = 90
+        if egg == "Large":
+            self.servo_msg.servo1 = 0        # directional servo means 180 is forward, 0 is backward, and 90 does nothing
+        elif egg == "Medium":
+            self.servo_msg.servo2 = 0
+        elif egg == "Bad":
+            self.servo_msg.servo3 = 0
+        
+        self.servo_pub.publish(self.servo_msg)
+
+    def CloseBin(self, egg):
+        # Set all servos to 90 (neutral)
+        self.servo_msg.servo1 = 90
+        self.servo_msg.servo2 = 90
+        self.servo_msg.servo3 = 90
+        if egg == "Large":
+            self.servo_msg.servo1 = 180        # directional servo means 180 is forward, 0 is backward, and 90 does nothing
+        elif egg == "Medium":
+            self.servo_msg.servo2 = 180
+        elif egg == "Bad":
+            self.servo_msg.servo3 = 180
+        
+        self.servo_pub.publish(self.servo_msg)
+
+    def FlipEgg(self):
+        
+        # Set all servos to 90 (neutral)
+        self.servo_msg.servo1 = 90
+        self.servo_msg.servo2 = 90
+        self.servo_msg.servo3 = 90
+
+        # Flip the egg
+        self.servo_msg.servo4 = 180  # positional servo (tune if needed)
+        self.servo_pub.publish(self.servo_msg)
+
+        # Start a 2-second timer to reset
+        self.flip_timer = self.create_timer(2.0, self._reset_servo)
+
+    def _reset_servo(self):
+        # Reset the flipper
+        self.servo_msg.servo4 = 0  # adjust if needed
+        self.servo_pub.publish(self.servo_msg)
+
+        # Destroy the timer so it doesn't repeat
+        self.flip_timer.cancel()
+        self.flip_timer = None
+
+
+    ################################
+    ### END OF General Functions ###
+    ################################
+
     #####################
     ### STATE MACHINE ###
     #####################
@@ -384,7 +570,6 @@ class HandleFSM(Node):
         """
         Function to run the state machine
         """
-
         self.complete_flag = False
         self.state = State.INIT
 
@@ -398,7 +583,9 @@ class HandleFSM(Node):
                 case State.TURN_RIGHT:
                     self.turn_right()
                 case State.DRIVE_STRAIGHT():
-                    self.drive_straight()
+                    self.drive_straight_forwards()
+                case State.DRIVE_BACKWARDS():
+                    self.drive_straight_backwards()
                 case State.DISPENSE:
                     self.dispense()
                 case _:
@@ -411,16 +598,17 @@ class HandleFSM(Node):
 
         self.task_info("Handle task started")
 
-        self.beginning_flag = True
+        self.turn_on_combine()
+
+        self.turn_on_conveyor()
 
         self.state = State.TURN_LEFT
 
     def turn_left(self):
         self.task_info("Turning Robot LEFT <------")
 
-        # Quick examples of how to use actions and services in the state machine
         self.task_info("Requesting turn left action")
-        response = asyncio.run(self.send_turn_left_goal())
+        response = asyncio.run(self.send_turn_left_goal(-90.0))
         while not asyncio.run(self.isTaskComplete()):
             time.sleep(0.1)
             self.task_info("In isTaskComplete loop")
@@ -428,11 +616,95 @@ class HandleFSM(Node):
                 asyncio.run(self.cancelTask())
                 raise Exception("Task execution canceled by action client")
 
-        if response and self.drivecontrol_result.success:
-            self.task_success("Robot is centered.")
-            self.complete_flag = True
+        if response and self.turn_result.success:
+            self.task_success("Robot turned left.")
+
+            self.state = State.DRIVE_STRAIGHT
+            self.prev_state = State.TURN_LEFT
         else:
-            self.task_warn("Robot is not centered! Staying in CENTER_ROBOT state.")
+            self.task_warn("Robot did not turn left! Staying in TURN_LEFT state.")
+
+        
+
+    def turn_right(self):
+        self.task_info("Turning Robot -------> RIGHT")
+
+        self.task_info("Requesting turn right action")
+        response = asyncio.run(self.send_turn_right_goal(90.0))
+        while not asyncio.run(self.isTaskComplete()):
+            time.sleep(0.1)
+            self.task_info("In isTaskComplete loop")
+            if self.task_goal_handle.is_cancel_requested:
+                asyncio.run(self.cancelTask())
+                raise Exception("Task execution canceled by action client")
+
+        if response and self.turn_result.success:
+            self.task_success("Robot turned right.")
+
+            self.state = State.DRIVE_STRAIGHT
+            self.prev_state = State.TURN_RIGHT
+        else:
+            self.task_warn("Robot did not turn right! Staying in TURN_RIGHT state.")
+
+
+
+    def drive_straight_forwards(self):
+        self.task_info("Driving Robot STRAIGHT")
+
+        self.task_info("Requesting drive straight action")
+        response = asyncio.run(self.send_drive_straight_goal(0.25))
+        while not asyncio.run(self.isTaskComplete()):
+            time.sleep(0.1)
+            self.task_info("In isTaskComplete loop")
+            if self.task_goal_handle.is_cancel_requested:
+                asyncio.run(self.cancelTask())
+                raise Exception("Task execution canceled by action client")
+
+        if response and self.drive_result.success:
+            self.task_success("Robot drove straight.")
+
+            # TODO: Insert egg collection publisher calls
+
+            # This is logic to see what state the robot should move into depending on its previous state.
+            if self.prev_state = State.TURN_LEFT:
+                self.state = State.TURN_RIGHT
+            if self.prev_state = State.TURN_RIGHT:
+                self.state = State.DRIVE_BACKWARDS
+            else:
+                self.state = State.DRIVE_BACKWARDS
+
+            self.prev_state = State.DRIVE_STRAIGHT
+
+        else:
+            self.task_warn("Robot did NOT drive straight correctly! Staying in DRIVE_STRAIGHT state.")
+
+    def drive_straight_backwards(self):
+        self.task_info("Driving Robot BACKWARDS")
+
+        self.task_info("Requesting drive backwards action")
+        response = asyncio.run(self.send_drive_straight_goal(1.1))
+        while not asyncio.run(self.isTaskComplete()):
+            time.sleep(0.1)
+            self.task_info("In isTaskComplete loop")
+            if self.task_goal_handle.is_cancel_requested:
+                asyncio.run(self.cancelTask())
+                raise Exception("Task execution canceled by action client")
+
+        if response and self.drive_result.success:
+            self.task_success("Robot drove backwards.")
+
+            self.state = State.DISPENSE
+            self.prev_state = State.DRIVE_BACKWARDS
+
+        else:
+            self.task_warn("Robot did NOT drive backwards correctly! Staying in DRIVE_BACKWARDS state.")
+
+    def dispense(self):
+        # TODO Kick the eggs out with a servo
+
+        self.state = State.DRIVE_STRAIGHT
+        self.prev_state = State.DISPENSE
+
 
     #########################
     ### END STATE MACHINE ###
