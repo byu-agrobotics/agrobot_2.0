@@ -2,6 +2,7 @@ import asyncio
 import rclpy
 import time
 import traceback
+from std_msgs.msg import Bool, Int8
 from enum import Enum, auto
 from rclpy.action import ActionServer, ActionClient, CancelResponse
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
@@ -80,6 +81,9 @@ class NavigateFSM(Node):
         #################################
         ### ROS 2 OBJECT DECLARATIONS ###
         #################################
+
+        # Publishers
+        self.LED_pub = self.create_publisher(Int8, "/LED", 10)
 
         # Callback groups (for threading)
         norm_callback_group = MutuallyExclusiveCallbackGroup()
@@ -383,6 +387,10 @@ class NavigateFSM(Node):
 
         if response and self.drive_center_result.success:
             self.task_success("Robot is centered.")
+            led_msg = Int8()
+            led_msg.data = 4
+            self.get_logger().info(f'LED publishing message: "{led_msg.data}"')
+            self.LED_pub.publish(led_msg)
             self.complete_flag = True
         else:
             self.task_warn("Robot is not centered! Staying in CENTER_ROBOT state.")
