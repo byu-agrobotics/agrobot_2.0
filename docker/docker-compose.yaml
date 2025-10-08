@@ -1,11 +1,8 @@
 # docker-compose.yml
-
-version: '3.8' # It's good practice to specify a version
-
 services:
   agrobot:
     image: byuagrobotics1/agrobot_2.0:latest
-    container_name: agrobot-ct
+    container_name: agrobot
     build:
       context: . # Assumes Dockerfile for agrobot is in the same directory
       dockerfile: Dockerfile # Specify if you have different Dockerfiles
@@ -17,11 +14,10 @@ services:
       - DISPLAY=$DISPLAY # Required for GUI applications
       - QT_X11_NO_MITSHM=1 # Required for GUI applications
     volumes:
-      - ../agrobot_ws:/home/agrobot-docker/agrobot_ws # Robot ROS 2 workspace
-      - ../firmware:/home/agrobot-docker/firmware # PIO microcontroller projects
-      - ../scripts:/home/agrobot-docker/scripts # Helpful scripts
-      - ../tutorial_ws:/home/agrobot-docker/tutorial_ws # Tutorial ROS 2 workspace
-      - ../base_scripts/tmuxp/tmp:/home/agrobot-docker/.tmuxp # Temporary tmuxp config files
+      - ../agrobot_ws:/home/agrobot/agrobot_ws # Robot ROS 2 workspace
+      - ../firmware:/home/agrobot/firmware # PIO microcontroller projects
+      - ../scripts:/home/agrobot/scripts # Helpful scripts
+      - ../base_scripts/tmuxp/tmp:/home/agrobot/.tmuxp # Temporary tmuxp config files
       - ./startup:/startup # Startup scripts
       - /dev:/dev:rw
       # - /etc/udev:/etc/udev:rw
@@ -38,7 +34,7 @@ services:
 
   roboclaw:
     image: roboclaw:latest
-    container_name: roboclaw-ct
+    container_name: agrobot-roboclaw
     build:
       context: . # Assumes Dockerfile for roboclaw is in the same directory
       dockerfile: Dockerfile.roboclaw # Specify if you have different Dockerfiles

@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TARGETARCH
 
 # Define a username and password for the new user
-ARG NAME=agrobot
+ARG NAME=agrobot-docker
 ARG PASS=agrobot
 
 # Update and upgrade
@@ -71,19 +71,20 @@ RUN ln -s /home/$NAME/.platformio/penv/bin/pio /usr/local/bin/pio
 RUN ln -s /home/$NAME/.platformio/penv/bin/piodebuggdb /usr/local/bin/piodebuggdb
 USER $NAME
 
-USER root
-RUN rosdep install --from-paths src --ignore-src -y
-USER $NAME
+# USER root
+# RUN rosdep update
+# RUN rosdep install --from-paths src --ignore-src -y
+# USER $NAME
 
 WORKDIR /home/$NAME
 
 # Dry run PlatformIO to install the necessary dependencies
-RUN git clone https://github.com/byu-agrobotics/agrobot_2.0.git
-# '|| true' is used to ignore errors on a pio command failure
-WORKDIR /home/$NAME/agrobot_2.0/firmware/teensy_pio
-RUN pio run -t upload || true
-WORKDIR /home/$NAME
-RUN rm -rf /home/$NAME/agrobot_2.0
+# RUN git clone https://github.com/byu-agrobotics/agrobot_2.0.git
+# # '|| true' is used to ignore errors on a pio command failure
+# WORKDIR /home/$NAME/agrobot_2.0/firmware/teensy_pio
+# # RUN pio run -t upload || true
+# WORKDIR /home/$NAME
+# RUN rm -rf /home/$NAME/agrobot_2.0
 
 # Set up automatic ROS 2 sourcing and colorized output
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
