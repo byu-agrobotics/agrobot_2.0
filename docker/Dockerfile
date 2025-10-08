@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TARGETARCH
 
 # Define a username and password for the new user
-ARG NAME=agrobot-docker
+ARG NAME=agrobot
 ARG PASS=agrobot
 
 # Update and upgrade
@@ -37,13 +37,11 @@ WORKDIR /home/$NAME
 USER root
 RUN apt update && apt install -y \
     curl \
-    wget \
     rsync \
     git \
     vim \
     nano \
-    tmux \
-    python3-pip
+    tmux
 USER $NAME
 
 # Install graphical interface dependencies
@@ -73,27 +71,9 @@ RUN ln -s /home/$NAME/.platformio/penv/bin/pio /usr/local/bin/pio
 RUN ln -s /home/$NAME/.platformio/penv/bin/piodebuggdb /usr/local/bin/piodebuggdb
 USER $NAME
 
-# Install the micro-ROS agent
-RUN mkdir microros_ws
-
-WORKDIR /home/$NAME/microros_ws
-RUN git clone -b humble https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
-# The below is a quick fix for segfaulting builds - Nelson Durrant, May 2025
-# It looks like someone broke the micro-ROS setup script, so we need to use a specific commit
-WORKDIR /home/$NAME/microros_ws/src/micro_ros_setup
-RUN git reset --hard 91a554f
-WORKDIR /home/$NAME/microros_ws
-RUN rosdep update
-
 USER root
 RUN rosdep install --from-paths src --ignore-src -y
 USER $NAME
-
-SHELL ["/bin/bash", "-c"] 
-RUN source /opt/ros/humble/setup.bash && colcon build
-RUN source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run micro_ros_setup create_agent_ws.sh
-RUN source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run micro_ros_setup build_agent.sh
-SHELL ["/bin/sh", "-c"]
 
 WORKDIR /home/$NAME
 
@@ -107,13 +87,12 @@ RUN rm -rf /home/$NAME/agrobot_2.0
 
 # Set up automatic ROS 2 sourcing and colorized output
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
-RUN echo "source /home/$NAME/microros_ws/install/setup.bash" >> /home/$NAME/.bashrc
 RUN echo "source /home/$NAME/agrobot_ws/install/setup.bash" >> /home/$NAME/.bashrc
 RUN echo "export RCUTILS_COLORIZED_OUTPUT=1" >> ~/.bashrc
 RUN touch ~/.hushlogin
 
-# Set up tmuxp for scripting purposes
-RUN pip3 install tmuxp
+#PIP INSTALLS
+RUN pip3 install tmuxp serial pyserial simple-pid
 
 # Add local python binaries to the PATH
 ENV PATH="$PATH:/home/$NAME/.local/bin"
@@ -193,14 +172,3 @@ RUN apt update && apt install -y \
     libxtst6 \
     x11-apps
 USER $NAME
-
-RUN pip3 install flask opencv-python-headless
-
-# Install the serial and pyserial libraries - Nelson Durrant, May 2025
-# Used by the roboclaw library for serial communication
-
-RUN pip3 install serial pyserial 
-
-# Used by the drive_controller node for PID control
-RUN pip3 install simple-pid
-
